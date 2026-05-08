@@ -18,10 +18,10 @@ export declare class PaymentsController {
             rounds: {
                 id: number;
                 createdAt: Date;
-                roundNum: number;
-                sessionId: number;
                 startTime: Date;
                 endTime: Date | null;
+                sessionId: number;
+                roundNum: number;
                 minutes: number | null;
                 cost: number | null;
             }[];
@@ -50,17 +50,19 @@ export declare class PaymentsController {
             createdAt: Date;
             updatedAt: Date;
             status: import(".prisma/client").$Enums.SessionStatus;
+            tableId: number;
+            customerId: number | null;
             startTime: Date;
             endTime: Date | null;
-            tableId: number;
             totalMinutes: number | null;
             playCost: number | null;
         };
     } & {
         id: number;
         createdAt: Date;
-        sessionId: number;
+        customerId: number | null;
         playCost: number;
+        sessionId: number;
         discount: number;
         serviceFee: number;
         method: import(".prisma/client").$Enums.PaymentMethod;
@@ -68,7 +70,9 @@ export declare class PaymentsController {
         cardAmount: number | null;
         notes: string | null;
         cashierName: string | null;
+        bonusRedeemed: number;
         orderCost: number;
+        bonusEarned: number;
         totalCost: number;
         paidAt: Date;
     }>;
@@ -87,10 +91,10 @@ export declare class PaymentsController {
             rounds: {
                 id: number;
                 createdAt: Date;
-                roundNum: number;
-                sessionId: number;
                 startTime: Date;
                 endTime: Date | null;
+                sessionId: number;
+                roundNum: number;
                 minutes: number | null;
                 cost: number | null;
             }[];
@@ -119,17 +123,19 @@ export declare class PaymentsController {
             createdAt: Date;
             updatedAt: Date;
             status: import(".prisma/client").$Enums.SessionStatus;
+            tableId: number;
+            customerId: number | null;
             startTime: Date;
             endTime: Date | null;
-            tableId: number;
             totalMinutes: number | null;
             playCost: number | null;
         };
     } & {
         id: number;
         createdAt: Date;
-        sessionId: number;
+        customerId: number | null;
         playCost: number;
+        sessionId: number;
         discount: number;
         serviceFee: number;
         method: import(".prisma/client").$Enums.PaymentMethod;
@@ -137,7 +143,9 @@ export declare class PaymentsController {
         cardAmount: number | null;
         notes: string | null;
         cashierName: string | null;
+        bonusRedeemed: number;
         orderCost: number;
+        bonusEarned: number;
         totalCost: number;
         paidAt: Date;
     }>;
@@ -151,10 +159,10 @@ export declare class PaymentsController {
         rounds: {
             id: number;
             createdAt: Date;
-            roundNum: number;
-            sessionId: number;
             startTime: Date;
             endTime: Date | null;
+            sessionId: number;
+            roundNum: number;
             minutes: number | null;
             cost: number | null;
         }[];

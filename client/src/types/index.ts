@@ -10,6 +10,43 @@ export interface AuthUser {
   role: Role;
 }
 
+export interface Customer {
+  id: number;
+  name: string;
+  phone: string;
+  cardNumber: string;
+  bonusBalance: number;
+  createdAt: string;
+  _count?: { visits: number };
+}
+
+export interface CustomerVisit {
+  id: number;
+  customerId: number;
+  sessionId: number;
+  playCost: number;
+  orderCost: number;
+  totalCost: number;
+  bonusEarned: number;
+  bonusRedeemed: number;
+  createdAt: string;
+  session?: {
+    id: number;
+    startTime: string;
+    endTime?: string | null;
+    table: { id: number; name: string; number: number };
+  };
+}
+
+export interface BusinessSettings {
+  id: number;
+  cashbackPercent: number;
+  dayHourlyPrice: number;
+  nightHourlyPrice: number;
+  dayStartTime: string;
+  nightStartTime: string;
+}
+
 export interface Table {
   id: number;
   name: string;
@@ -33,6 +70,8 @@ export interface Session {
   rounds: SessionRound[];
   orders: SessionOrder[];
   payment?: Payment | null;
+  customerId?: number | null;
+  customer?: Customer | null;
 }
 
 export interface SessionRound {
@@ -82,6 +121,9 @@ export interface Payment {
   totalCost: number;
   method: PaymentMethod;
   paidAt: string;
+  bonusRedeemed?: number;
+  bonusEarned?: number;
+  customerId?: number | null;
 }
 
 export interface ReceiptData {
@@ -100,6 +142,8 @@ export interface ReceiptData {
   orderCost: number;
   serviceFee: number;
   discount: number;
+  bonusRedeemed?: number;
+  bonusEarned?: number;
   totalCost: number;
   method: PaymentMethod;
   cashAmount: number | null;
@@ -107,6 +151,9 @@ export interface ReceiptData {
   change: number | null;
   notes: string | null;
   paidAt: string;
+  customerName?: string | null;
+  customerCard?: string | null;
+  bonusBalance?: number | null;
 }
 
 export interface TodayStats {

@@ -10,6 +10,9 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReportsModule } from './reports/reports.module';
 import { WsModule } from './websocket/ws.module';
+import { CustomersModule } from './customers/customers.module';
+import { SettingsModule } from './settings/settings.module';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { WsModule } from './websocket/ws.module';
     PaymentsModule,
     ReportsModule,
     WsModule,
+    CustomersModule,
+    SettingsModule,
+    TelegramModule,
   ],
 })
 export class AppModule {}

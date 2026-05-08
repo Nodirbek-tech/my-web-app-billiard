@@ -9,6 +9,7 @@ export interface StopAndPayPayload {
   cardAmount?: number;
   notes?: string;
   cashierName?: string;
+  bonusRedeemed?: number;
 }
 
 export const sessionsApi = {
@@ -31,6 +32,10 @@ export const sessionsApi = {
   },
   getActiveByTable: async (tableId: number): Promise<Session | null> => {
     const { data } = await api.get(`/sessions/table/${tableId}/active`);
+    return data;
+  },
+  attachCustomer: async (sessionId: number, customerId: number | null): Promise<Session> => {
+    const { data } = await api.patch(`/sessions/${sessionId}/customer`, { customerId });
     return data;
   },
 };

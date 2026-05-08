@@ -6,4 +6,5 @@ export declare class StopAndPayDto {
     cardAmount?: number;
     notes?: string;
     cashierName?: string;
+    bonusRedeemed?: number;
 }

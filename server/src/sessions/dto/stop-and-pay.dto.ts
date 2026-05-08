@@ -44,4 +44,11 @@ export class StopAndPayDto {
   @IsOptional()
   @IsString()
   cashierName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  bonusRedeemed?: number;
 }

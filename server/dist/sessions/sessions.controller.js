@@ -19,6 +19,18 @@ const sessions_service_1 = require("./sessions.service");
 const stop_and_pay_dto_1 = require("./dto/stop-and-pay.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const current_user_decorator_1 = require("../auth/decorators/current-user.decorator");
+const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+class AttachCustomerDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false, nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], AttachCustomerDto.prototype, "customerId", void 0);
 let SessionsController = class SessionsController {
     constructor(sessions) {
         this.sessions = sessions;
@@ -33,6 +45,9 @@ let SessionsController = class SessionsController {
         if (!dto.cashierName)
             dto.cashierName = user?.name ?? 'Staff';
         return this.sessions.stopAndPay(id, dto);
+    }
+    attachCustomer(id, dto) {
+        return this.sessions.attachCustomer(id, dto.customerId ?? null);
     }
     getOne(id) {
         return this.sessions.getSession(id);
@@ -65,6 +80,14 @@ __decorate([
     __metadata("design:paramtypes", [Number, stop_and_pay_dto_1.StopAndPayDto, Object]),
     __metadata("design:returntype", void 0)
 ], SessionsController.prototype, "stopAndPay", null);
+__decorate([
+    (0, common_1.Patch)(':id/customer'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, AttachCustomerDto]),
+    __metadata("design:returntype", void 0)
+], SessionsController.prototype, "attachCustomer", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),

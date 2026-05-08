@@ -54,8 +54,10 @@ PORT=3000
 cd server
 npm install
 npm run prisma:generate
-npm run prisma:migrate -- --name init
+npm run prisma:migrate -- --name add_loyalty_system
 ```
+
+> **First time setup:** use `--name init` instead.
 
 ### 5. Seed the database
 
@@ -67,8 +69,10 @@ npx ts-node --project tsconfig.json ../prisma/seed.ts
 This creates:
 - **Admin:** `admin@billiard.com` / `admin123`
 - **Staff:** `staff@billiard.com` / `staff123`
-- 4 sample tables
-- 2 categories (Drinks, Snacks) with 7 products
+- 4 sample tables (20 000–25 000 so'm/soat)
+- 2 categories (Ichimliklar, Gazaklar) with 7 products
+- 3 sample customers with loyalty cards
+- BusinessSettings: 5% cashback
 
 ### 6. Configure client environment
 
@@ -147,6 +151,20 @@ Open **http://localhost:5173** in your browser.
 - Payment methods: **Cash** (with change calculation), **Card**, or **Mixed** (split cash + card)
 - Notes field for VIP discounts, group bookings, etc.
 
+### Customer Loyalty System
+- **Mijozlar** page: customer list with search (name, phone, card number), add/view/delete
+- **Loyalty card** auto-generated: `LC-XXXXXXXX` (8-digit zero-padded ID)
+- **Attach customer** to active session from the session panel ("Mijoz biriktirish")
+- **Bonus redemption**: during payment, use bonus points to reduce the payable amount
+- **Cashback**: after payment, customer earns `round(totalPaid × cashbackPercent / 100)` bonus points
+- **Visit history**: per-customer list of all sessions with play/order/bonus details
+- **Admin settings**: configure cashback percent at `/settings` (default 5%)
+
+### Receipt
+- 80mm thermal (42 chars/line), full Uzbek labels
+- Shows customer name and card number if attached
+- Bonus redeemed line (if used), bonus earned line, updated balance
+
 ### Receipt Printing
 - 80mm thermal printer compatible (42 chars/line, Courier New)
 - Auto-opens browser print dialog immediately after payment
@@ -175,8 +193,16 @@ All endpoints (except `POST /auth/login`) require a Bearer JWT token.
 | POST | /sessions/start/:tableId | Start session |
 | POST | /sessions/:id/next-round | Next round |
 | POST | /sessions/:id/stop-and-pay | Stop session + process payment (atomic) |
+| PATCH | /sessions/:id/customer | Attach/detach customer from session |
 | POST | /orders | Add order to session |
 | DELETE | /orders/:id | Remove order |
+| GET | /customers | List customers (search by name/phone/card) |
+| POST | /customers | Create customer |
+| GET | /customers/:id | Customer profile + visit history |
+| PATCH | /customers/:id | Update customer |
+| DELETE | /customers/:id | Delete customer |
+| GET | /settings | Get business settings |
+| PATCH | /settings | Update cashback percent (Admin) |
 | GET | /reports/today | Today stats |
 | GET | /reports/sessions | Session history (paginated) |
 
@@ -197,6 +223,9 @@ billiard-club/
 │   │   ├── products/          # Products & categories
 │   │   ├── orders/            # Session orders
 │   │   ├── payments/          # Payments & receipts
+│   │   ├── customers/         # Customer loyalty (CRUD + card gen)
+│   │   ├── settings/          # Business settings (cashback %)
+│   │   ├── telegram/          # Telegram bot skeleton (Phase 2)
 │   │   ├── reports/           # Analytics
 │   │   ├── websocket/         # Socket.io gateway
 │   │   └── prisma/            # Prisma service

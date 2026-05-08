@@ -31,8 +31,9 @@ export declare class ReportsService {
             payment: {
                 id: number;
                 createdAt: Date;
-                sessionId: number;
+                customerId: number | null;
                 playCost: number;
+                sessionId: number;
                 discount: number;
                 serviceFee: number;
                 method: import(".prisma/client").$Enums.PaymentMethod;
@@ -40,7 +41,9 @@ export declare class ReportsService {
                 cardAmount: number | null;
                 notes: string | null;
                 cashierName: string | null;
+                bonusRedeemed: number;
                 orderCost: number;
+                bonusEarned: number;
                 totalCost: number;
                 paidAt: Date;
             };
@@ -52,9 +55,10 @@ export declare class ReportsService {
             createdAt: Date;
             updatedAt: Date;
             status: import(".prisma/client").$Enums.SessionStatus;
+            tableId: number;
+            customerId: number | null;
             startTime: Date;
             endTime: Date | null;
-            tableId: number;
             totalMinutes: number | null;
             playCost: number | null;
         })[];

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, BarChart3, Users, Circle } from 'lucide-react';
+import { LayoutDashboard, Package, BarChart3, Users, Circle, UserCheck, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 
@@ -7,10 +7,12 @@ const navItems = [
   { to: '/', label: 'Stollar', icon: LayoutDashboard, exact: true },
   { to: '/products', label: 'Mahsulotlar', icon: Package },
   { to: '/reports', label: 'Hisobotlar', icon: BarChart3 },
+  { to: '/customers', label: 'Mijozlar', icon: UserCheck },
 ];
 
 const adminItems = [
   { to: '/users', label: 'Foydalanuvchilar', icon: Users },
+  { to: '/settings', label: 'Sozlamalar', icon: Settings },
 ];
 
 export default function Sidebar() {

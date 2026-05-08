@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { LayoutDashboard } from 'lucide-react';
 import { tablesApi } from '@/api/tables';
+import { settingsApi } from '@/api/settings';
 import { useUiStore } from '@/store/uiStore';
 import { Skeleton } from '@/components/ui/skeleton';
 import TableCard from '@/components/tables/TableCard';
 import AddTableDialog from '@/components/tables/AddTableDialog';
 import SessionPanel from '@/components/sessions/SessionPanel';
 import ReceiptModal from '@/components/receipt/ReceiptModal';
-import type { Table } from '@/types';
+import type { Table, BusinessSettings } from '@/types';
 
 function TablesSkeleton() {
   return (
@@ -26,6 +27,12 @@ export default function DashboardPage() {
     queryKey: ['tables'],
     queryFn: tablesApi.getAll,
     refetchInterval: 10_000,
+  });
+
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: settingsApi.get,
+    staleTime: 60_000,
   });
 
   const selectedTable = tables.find((t: Table) => t.id === selectedTableId);
@@ -60,7 +67,7 @@ export default function DashboardPage() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {tables.map((table: Table) => (
-              <TableCard key={table.id} table={table} />
+              <TableCard key={table.id} table={table} settings={settings} />
             ))}
           </div>
         )}
@@ -68,7 +75,7 @@ export default function DashboardPage() {
 
       {selectedTable && (
         <div className="w-80 flex-shrink-0 bg-card border border-border rounded-xl overflow-hidden animate-fade-in">
-          <SessionPanel table={selectedTable} />
+          <SessionPanel table={selectedTable} settings={settings} />
         </div>
       )}
 

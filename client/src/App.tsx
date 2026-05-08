@@ -10,6 +10,8 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ProductsPage = lazy(() => import('./pages/ProductsPage'));
 const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const UsersPage = lazy(() => import('./pages/UsersPage'));
+const CustomersPage = lazy(() => import('./pages/CustomersPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 function PageLoader() {
   return (
@@ -48,6 +50,8 @@ export default function App() {
           <Route path="products" element={<Suspense fallback={<PageLoader />}><ProductsPage /></Suspense>} />
           <Route path="reports" element={<Suspense fallback={<PageLoader />}><ReportsPage /></Suspense>} />
           <Route path="users" element={<Suspense fallback={<PageLoader />}><UsersPage /></Suspense>} />
+          <Route path="customers" element={<Suspense fallback={<PageLoader />}><CustomersPage /></Suspense>} />
+          <Route path="settings" element={<Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

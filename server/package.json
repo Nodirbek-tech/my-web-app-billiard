@@ -8,7 +8,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "prisma:generate": "prisma generate --schema=../prisma/schema.prisma",
+    "prisma:generate": "prisma generate --no-engine --schema=../prisma/schema.prisma && node -e \"const fs=require('fs'),p='node_modules/.prisma/client/index.js';fs.writeFileSync(p,fs.readFileSync(p,'utf8').replace('\\\"copyEngine\\\": false','\\\"copyEngine\\\": true'))\"",
     "prisma:migrate": "prisma migrate dev --schema=../prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=../prisma/schema.prisma",
     "seed": "ts-node --project tsconfig.json -e \"require('../prisma/seed.ts')\""

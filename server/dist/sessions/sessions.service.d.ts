@@ -1,11 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { WsService } from '../websocket/ws.service';
+import { SettingsService } from '../settings/settings.service';
 import { StopAndPayDto } from './dto/stop-and-pay.dto';
 export declare class SessionsService {
     private prisma;
     private ws;
-    constructor(prisma: PrismaService, ws: WsService);
-    private calcCost;
+    private settingsService;
+    constructor(prisma: PrismaService, ws: WsService, settingsService: SettingsService);
     private sessionIncludes;
     startSession(tableId: number): Promise<{
         table: {
@@ -21,8 +22,9 @@ export declare class SessionsService {
         payment: {
             id: number;
             createdAt: Date;
-            sessionId: number;
+            customerId: number | null;
             playCost: number;
+            sessionId: number;
             discount: number;
             serviceFee: number;
             method: import(".prisma/client").$Enums.PaymentMethod;
@@ -30,17 +32,30 @@ export declare class SessionsService {
             cardAmount: number | null;
             notes: string | null;
             cashierName: string | null;
+            bonusRedeemed: number;
             orderCost: number;
+            bonusEarned: number;
             totalCost: number;
             paidAt: Date;
+        };
+        customer: {
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
+            cardNumber: string;
+            bonusBalance: number;
+            telegramId: string | null;
+            telegramUsername: string | null;
         };
         rounds: {
             id: number;
             createdAt: Date;
-            roundNum: number;
-            sessionId: number;
             startTime: Date;
             endTime: Date | null;
+            sessionId: number;
+            roundNum: number;
             minutes: number | null;
             cost: number | null;
         }[];
@@ -69,9 +84,10 @@ export declare class SessionsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SessionStatus;
+        tableId: number;
+        customerId: number | null;
         startTime: Date;
         endTime: Date | null;
-        tableId: number;
         totalMinutes: number | null;
         playCost: number | null;
     }>;
@@ -89,8 +105,9 @@ export declare class SessionsService {
         payment: {
             id: number;
             createdAt: Date;
-            sessionId: number;
+            customerId: number | null;
             playCost: number;
+            sessionId: number;
             discount: number;
             serviceFee: number;
             method: import(".prisma/client").$Enums.PaymentMethod;
@@ -98,17 +115,30 @@ export declare class SessionsService {
             cardAmount: number | null;
             notes: string | null;
             cashierName: string | null;
+            bonusRedeemed: number;
             orderCost: number;
+            bonusEarned: number;
             totalCost: number;
             paidAt: Date;
+        };
+        customer: {
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
+            cardNumber: string;
+            bonusBalance: number;
+            telegramId: string | null;
+            telegramUsername: string | null;
         };
         rounds: {
             id: number;
             createdAt: Date;
-            roundNum: number;
-            sessionId: number;
             startTime: Date;
             endTime: Date | null;
+            sessionId: number;
+            roundNum: number;
             minutes: number | null;
             cost: number | null;
         }[];
@@ -137,9 +167,10 @@ export declare class SessionsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SessionStatus;
+        tableId: number;
+        customerId: number | null;
         startTime: Date;
         endTime: Date | null;
-        tableId: number;
         totalMinutes: number | null;
         playCost: number | null;
     }>;
@@ -157,8 +188,9 @@ export declare class SessionsService {
         payment: {
             id: number;
             createdAt: Date;
-            sessionId: number;
+            customerId: number | null;
             playCost: number;
+            sessionId: number;
             discount: number;
             serviceFee: number;
             method: import(".prisma/client").$Enums.PaymentMethod;
@@ -166,17 +198,30 @@ export declare class SessionsService {
             cardAmount: number | null;
             notes: string | null;
             cashierName: string | null;
+            bonusRedeemed: number;
             orderCost: number;
+            bonusEarned: number;
             totalCost: number;
             paidAt: Date;
+        };
+        customer: {
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
+            cardNumber: string;
+            bonusBalance: number;
+            telegramId: string | null;
+            telegramUsername: string | null;
         };
         rounds: {
             id: number;
             createdAt: Date;
-            roundNum: number;
-            sessionId: number;
             startTime: Date;
             endTime: Date | null;
+            sessionId: number;
+            roundNum: number;
             minutes: number | null;
             cost: number | null;
         }[];
@@ -205,15 +250,99 @@ export declare class SessionsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SessionStatus;
+        tableId: number;
+        customerId: number | null;
         startTime: Date;
         endTime: Date | null;
+        totalMinutes: number | null;
+        playCost: number | null;
+    }>;
+    attachCustomer(sessionId: number, customerId: number | null): Promise<{
+        table: {
+            number: number;
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            hourlyPrice: number;
+            nightPrice: number | null;
+            status: import(".prisma/client").$Enums.TableStatus;
+        };
+        payment: {
+            id: number;
+            createdAt: Date;
+            customerId: number | null;
+            playCost: number;
+            sessionId: number;
+            discount: number;
+            serviceFee: number;
+            method: import(".prisma/client").$Enums.PaymentMethod;
+            cashAmount: number | null;
+            cardAmount: number | null;
+            notes: string | null;
+            cashierName: string | null;
+            bonusRedeemed: number;
+            orderCost: number;
+            bonusEarned: number;
+            totalCost: number;
+            paidAt: Date;
+        };
+        customer: {
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
+            cardNumber: string;
+            bonusBalance: number;
+            telegramId: string | null;
+            telegramUsername: string | null;
+        };
+        rounds: {
+            id: number;
+            createdAt: Date;
+            startTime: Date;
+            endTime: Date | null;
+            sessionId: number;
+            roundNum: number;
+            minutes: number | null;
+            cost: number | null;
+        }[];
+        orders: ({
+            product: {
+                name: string;
+                id: number;
+                createdAt: Date;
+                updatedAt: Date;
+                price: number;
+                categoryId: number;
+                stock: number | null;
+                active: boolean;
+            };
+        } & {
+            id: number;
+            createdAt: Date;
+            sessionId: number;
+            productId: number;
+            quantity: number;
+            unitPrice: number;
+            total: number;
+        })[];
+    } & {
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+        status: import(".prisma/client").$Enums.SessionStatus;
         tableId: number;
+        customerId: number | null;
+        startTime: Date;
+        endTime: Date | null;
         totalMinutes: number | null;
         playCost: number | null;
     }>;
     stopAndPay(sessionId: number, dto: StopAndPayDto): Promise<{
         receiptNumber: string;
-        paymentId: any;
+        paymentId: number;
         sessionId: number;
         tableNumber: number;
         tableName: string;
@@ -238,13 +367,18 @@ export declare class SessionsService {
         orderCost: number;
         serviceFee: number;
         discount: number;
+        bonusRedeemed: number;
+        bonusEarned: number;
         totalCost: number;
         method: "CASH" | "CARD" | "MIXED";
         cashAmount: number;
         cardAmount: number;
         change: number;
         notes: string;
-        paidAt: any;
+        paidAt: string;
+        customerName: string;
+        customerCard: string;
+        bonusBalance: number;
     }>;
     getSession(id: number): Promise<{
         table: {
@@ -260,8 +394,9 @@ export declare class SessionsService {
         payment: {
             id: number;
             createdAt: Date;
-            sessionId: number;
+            customerId: number | null;
             playCost: number;
+            sessionId: number;
             discount: number;
             serviceFee: number;
             method: import(".prisma/client").$Enums.PaymentMethod;
@@ -269,17 +404,30 @@ export declare class SessionsService {
             cardAmount: number | null;
             notes: string | null;
             cashierName: string | null;
+            bonusRedeemed: number;
             orderCost: number;
+            bonusEarned: number;
             totalCost: number;
             paidAt: Date;
+        };
+        customer: {
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
+            cardNumber: string;
+            bonusBalance: number;
+            telegramId: string | null;
+            telegramUsername: string | null;
         };
         rounds: {
             id: number;
             createdAt: Date;
-            roundNum: number;
-            sessionId: number;
             startTime: Date;
             endTime: Date | null;
+            sessionId: number;
+            roundNum: number;
             minutes: number | null;
             cost: number | null;
         }[];
@@ -308,9 +456,10 @@ export declare class SessionsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SessionStatus;
+        tableId: number;
+        customerId: number | null;
         startTime: Date;
         endTime: Date | null;
-        tableId: number;
         totalMinutes: number | null;
         playCost: number | null;
     }>;
@@ -328,8 +477,9 @@ export declare class SessionsService {
         payment: {
             id: number;
             createdAt: Date;
-            sessionId: number;
+            customerId: number | null;
             playCost: number;
+            sessionId: number;
             discount: number;
             serviceFee: number;
             method: import(".prisma/client").$Enums.PaymentMethod;
@@ -337,17 +487,30 @@ export declare class SessionsService {
             cardAmount: number | null;
             notes: string | null;
             cashierName: string | null;
+            bonusRedeemed: number;
             orderCost: number;
+            bonusEarned: number;
             totalCost: number;
             paidAt: Date;
+        };
+        customer: {
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            phone: string;
+            cardNumber: string;
+            bonusBalance: number;
+            telegramId: string | null;
+            telegramUsername: string | null;
         };
         rounds: {
             id: number;
             createdAt: Date;
-            roundNum: number;
-            sessionId: number;
             startTime: Date;
             endTime: Date | null;
+            sessionId: number;
+            roundNum: number;
             minutes: number | null;
             cost: number | null;
         }[];
@@ -376,9 +539,10 @@ export declare class SessionsService {
         createdAt: Date;
         updatedAt: Date;
         status: import(".prisma/client").$Enums.SessionStatus;
+        tableId: number;
+        customerId: number | null;
         startTime: Date;
         endTime: Date | null;
-        tableId: number;
         totalMinutes: number | null;
         playCost: number | null;
     }>;

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Banknote, CreditCard, Shuffle, Tag, Percent, FileText, CheckCircle2, Loader2, Clock, ShoppingCart } from 'lucide-react';
+import { Banknote, CreditCard, Shuffle, Tag, Percent, FileText, CheckCircle2, Loader2, Clock, ShoppingCart, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,26 +9,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn, formatCurrency, formatTime, formatDuration } from '@/lib/utils';
+import { cn, formatCurrency, formatTime, formatDuration, calcCostMs, parseTimeHour } from '@/lib/utils';
 import { sessionsApi, type StopAndPayPayload } from '@/api/sessions';
 import { useAuthStore } from '@/store/authStore';
-import type { Session, Table, ReceiptData } from '@/types';
+import type { Session, Table, ReceiptData, BusinessSettings } from '@/types';
 
-function useBillingPreview(session: Session, table: Table) {
+function useBillingPreview(session: Session, settings?: BusinessSettings) {
   return useMemo(() => {
     const now = new Date();
     const activeRound = session.rounds?.find((r) => !r.endTime);
+
+    const dayRate = settings?.dayHourlyPrice ?? 40000;
+    const nightRate = settings?.nightHourlyPrice ?? 50000;
+    const dayStartHour = settings ? parseTimeHour(settings.dayStartTime) : 6;
+    const nightStartHour = settings ? parseTimeHour(settings.nightStartTime) : 18;
 
     let currentCost = 0;
     let currentMinutes = 0;
 
     if (activeRound) {
-      const ms = now.getTime() - new Date(activeRound.startTime).getTime();
+      const startMs = new Date(activeRound.startTime).getTime();
+      const ms = now.getTime() - startMs;
       currentMinutes = Math.ceil(ms / 60000);
-      const h = new Date(activeRound.startTime).getHours();
-      const isNight = h >= 18 || h < 6;
-      const rate = table.nightPrice && isNight ? table.nightPrice : table.hourlyPrice;
-      currentCost = Math.round((currentMinutes / 60) * rate * 100) / 100;
+      currentCost = calcCostMs(startMs, now.getTime(), dayRate, nightRate, dayStartHour, nightStartHour);
     }
 
     const completedRounds = session.rounds?.filter((r) => !!r.endTime) ?? [];
@@ -46,7 +49,7 @@ function useBillingPreview(session: Session, table: Table) {
     const totalMinutes = allRoundsPreview.reduce((s, r) => s + (r.minutes ?? 0), 0);
 
     return { playCost, orderCost, totalMinutes, allRoundsPreview };
-  }, [session, table]);
+  }, [session, settings]);
 }
 
 type PayMethod = 'CASH' | 'CARD' | 'MIXED';
@@ -54,25 +57,33 @@ type PayMethod = 'CASH' | 'CARD' | 'MIXED';
 interface PaymentDialogProps {
   session: Session;
   table: Table;
+  settings?: BusinessSettings;
   open: boolean;
   onCancel: () => void;
   onSuccess: (receipt: ReceiptData) => void;
 }
 
-export default function PaymentDialog({ session, table, open, onCancel, onSuccess }: PaymentDialogProps) {
+export default function PaymentDialog({ session, table, settings, open, onCancel, onSuccess }: PaymentDialogProps) {
   const { user } = useAuthStore();
   const [method, setMethod] = useState<PayMethod>('CASH');
   const [discount, setDiscount] = useState('');
   const [serviceFee, setServiceFee] = useState('');
+  const [bonusInput, setBonusInput] = useState('');
   const [cashAmount, setCashAmount] = useState('');
   const [cardAmount, setCardAmount] = useState('');
   const [notes, setNotes] = useState('');
 
-  const { playCost, orderCost, totalMinutes, allRoundsPreview } = useBillingPreview(session, table);
+  const customer = session.customer;
+  const maxBonus = customer?.bonusBalance ?? 0;
+
+  const { playCost, orderCost, totalMinutes, allRoundsPreview } = useBillingPreview(session, settings);
 
   const discountNum = Math.max(0, parseFloat(discount) || 0);
   const serviceFeeNum = Math.max(0, parseFloat(serviceFee) || 0);
-  const total = Math.max(0, Math.round((playCost + orderCost + serviceFeeNum - discountNum) * 100) / 100);
+  const bonusNum = Math.min(Math.max(0, parseFloat(bonusInput) || 0), maxBonus);
+  const grossTotal = Math.max(0, Math.round((playCost + orderCost + serviceFeeNum - discountNum) * 100) / 100);
+  const total = Math.max(0, Math.round((grossTotal - bonusNum) * 100) / 100);
+
   const cashNum = parseFloat(cashAmount) || 0;
   const cardNum = parseFloat(cardAmount) || 0;
   const change = method === 'CASH' && cashNum >= total ? Math.round((cashNum - total) * 100) / 100 : 0;
@@ -92,6 +103,7 @@ export default function PaymentDialog({ session, table, open, onCancel, onSucces
         serviceFee: serviceFeeNum || undefined,
         notes: notes.trim() || undefined,
         cashierName: user?.name,
+        bonusRedeemed: bonusNum || undefined,
       };
       if (method === 'CASH' && cashNum > 0) payload.cashAmount = cashNum;
       if (method === 'CARD') payload.cardAmount = total;
@@ -126,6 +138,22 @@ export default function PaymentDialog({ session, table, open, onCancel, onSucces
 
         <ScrollArea className="flex-1">
           <div className="p-5 space-y-5">
+
+            {/* Customer info */}
+            {customer && (
+              <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 text-sm flex items-center justify-between">
+                <div>
+                  <p className="font-semibold">{customer.name}</p>
+                  <p className="text-xs text-muted-foreground">{customer.cardNumber}</p>
+                </div>
+                {maxBonus > 0 && (
+                  <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium bg-emerald-500/10 px-2 py-1 rounded-full">
+                    <Star className="w-3 h-3" />
+                    {formatCurrency(maxBonus)}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Billing summary */}
             <div className="rounded-xl bg-secondary/30 border border-border/50 overflow-hidden text-sm">
@@ -196,12 +224,38 @@ export default function PaymentDialog({ session, table, open, onCancel, onSucces
               </div>
             </div>
 
+            {/* Bonus redemption */}
+            {customer && maxBonus > 0 && (
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Star className="w-3 h-3 text-emerald-400" />
+                  Bonus ishlatish (max: {formatCurrency(maxBonus)})
+                </Label>
+                <Input
+                  type="number"
+                  value={bonusInput}
+                  onChange={(e) => setBonusInput(e.target.value)}
+                  min="0"
+                  max={maxBonus}
+                  step="100"
+                  placeholder="0"
+                  className="h-9"
+                />
+                {bonusNum > 0 && (
+                  <p className="text-xs text-emerald-400">
+                    {formatCurrency(bonusNum)} bonus ayriladi
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Grand Total */}
             <div className="rounded-xl bg-primary/10 border border-primary/20 p-4 space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground"><span>O'yin</span><span>{formatCurrency(playCost)}</span></div>
               <div className="flex justify-between text-muted-foreground"><span>Mahsulotlar</span><span>{formatCurrency(orderCost)}</span></div>
               {serviceFeeNum > 0 && <div className="flex justify-between text-muted-foreground"><span>Xizmat haqi</span><span>+{formatCurrency(serviceFeeNum)}</span></div>}
               {discountNum > 0 && <div className="flex justify-between text-amber-400 font-medium"><span>Chegirma</span><span>-{formatCurrency(discountNum)}</span></div>}
+              {bonusNum > 0 && <div className="flex justify-between text-emerald-400 font-medium"><span>Bonus</span><span>-{formatCurrency(bonusNum)}</span></div>}
               <Separator />
               <div className="flex justify-between font-bold text-2xl">
                 <span>JAMI</span>

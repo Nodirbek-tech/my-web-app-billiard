@@ -57,12 +57,20 @@ function buildLines(r: ReceiptData): string[] {
     L.push(padLine('  Mahsulotlar jami', formatMoney(r.orderCost)));
   }
 
+  // Customer info
+  if (r.customerName) {
+    L.push(divider());
+    L.push(padLine('Mijoz:', r.customerName));
+    if (r.customerCard) L.push(padLine('Karta:', r.customerCard));
+  }
+
   // Billing breakdown
   L.push(divider());
   L.push(dotLine("O'yin", formatMoney(r.playCost)));
-  if (r.orderCost > 0)  L.push(dotLine('Mahsulotlar', formatMoney(r.orderCost)));
-  if (r.serviceFee > 0) L.push(dotLine('Xizmat haqi', `+${formatMoney(r.serviceFee)}`));
-  if (r.discount > 0)   L.push(dotLine('Chegirma', `-${formatMoney(r.discount)}`));
+  if (r.orderCost > 0)   L.push(dotLine('Mahsulotlar', formatMoney(r.orderCost)));
+  if (r.serviceFee > 0)  L.push(dotLine('Xizmat haqi', `+${formatMoney(r.serviceFee)}`));
+  if (r.discount > 0)    L.push(dotLine('Chegirma', `-${formatMoney(r.discount)}`));
+  if ((r.bonusRedeemed ?? 0) > 0) L.push(dotLine('Bonus ishlatildi', `-${formatMoney(r.bonusRedeemed!)}`));
   L.push(divider('='));
   L.push(padLine('JAMI', formatMoney(r.totalCost)));
   L.push(divider('='));
@@ -75,6 +83,13 @@ function buildLines(r: ReceiptData): string[] {
     L.push(dotLine('  Karta', formatMoney(r.cardAmount)));
   if (r.change != null && r.change > 0)
     L.push(dotLine('  Qaytim', formatMoney(r.change)));
+
+  // Bonus earned
+  if ((r.bonusEarned ?? 0) > 0) {
+    L.push(divider());
+    L.push(dotLine('Bonus yig\'ildi', `+${formatMoney(r.bonusEarned!)}`));
+    if (r.bonusBalance != null) L.push(dotLine('Bonus balansi', formatMoney(r.bonusBalance)));
+  }
 
   if (r.notes) {
     L.push(divider());

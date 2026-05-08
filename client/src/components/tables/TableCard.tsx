@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Play, Eye, Clock } from 'lucide-react';
-import { cn, formatCurrency } from '@/lib/utils';
+import { Play, Eye, Clock, Sun, Moon } from 'lucide-react';
+import { cn, formatCurrency, calcCostMs, parseTimeHour } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import type { Table } from '@/types';
+import type { Table, BusinessSettings } from '@/types';
 import { sessionsApi } from '@/api/sessions';
 import { useUiStore } from '@/store/uiStore';
 import { useTimer } from '@/hooks/useTimer';
@@ -14,21 +14,28 @@ function LiveTimer({ startTime }: { startTime: string }) {
   return <span className="font-mono text-3xl font-bold text-primary tabular-nums">{display}</span>;
 }
 
-function LiveCost({ table }: { table: Table }) {
-  const { elapsed } = useTimer(table.activeSession?.startTime ?? null);
-  const hours = elapsed / 3600000;
-  const h = table.activeSession ? new Date(table.activeSession.startTime).getHours() : 0;
-  const isNight = h >= 18 || h < 6;
-  const rate = table.nightPrice && isNight ? table.nightPrice : table.hourlyPrice;
-  const cost = Math.round(hours * rate * 100) / 100;
+function LiveCost({ startTime, settings }: { startTime: string; settings?: BusinessSettings }) {
+  const { elapsed } = useTimer(startTime);
+  if (!settings) return null;
+  const now = Date.now();
+  const start = now - elapsed;
+  const cost = calcCostMs(
+    start,
+    now,
+    settings.dayHourlyPrice,
+    settings.nightHourlyPrice,
+    parseTimeHour(settings.dayStartTime),
+    parseTimeHour(settings.nightStartTime),
+  );
   return <span className="text-emerald-400 font-semibold">{formatCurrency(cost)}</span>;
 }
 
 interface TableCardProps {
   table: Table;
+  settings?: BusinessSettings;
 }
 
-export default function TableCard({ table }: TableCardProps) {
+export default function TableCard({ table, settings }: TableCardProps) {
   const { setSelectedTable } = useUiStore();
   const qc = useQueryClient();
 
@@ -44,6 +51,12 @@ export default function TableCard({ table }: TableCardProps) {
   const isOccupied = table.status === 'OCCUPIED';
   const session = table.activeSession;
   const currentRound = session?.rounds?.find((r) => !r.endTime);
+
+  const now = new Date();
+  const nowHour = now.getHours();
+  const dayStartHour = settings ? parseTimeHour(settings.dayStartTime) : 6;
+  const nightStartHour = settings ? parseTimeHour(settings.nightStartTime) : 18;
+  const isCurrentlyNight = nowHour >= nightStartHour || nowHour < dayStartHour;
 
   return (
     <div
@@ -79,15 +92,24 @@ export default function TableCard({ table }: TableCardProps) {
             <span className="text-muted-foreground">
               Raund {(session.rounds?.filter(r => r.endTime).length ?? 0) + 1}
             </span>
-            <LiveCost table={table} />
+            <LiveCost
+              startTime={currentRound?.startTime ?? session.startTime}
+              settings={settings}
+            />
           </div>
         </div>
       )}
 
-      {!isOccupied && (
-        <div className="text-xs text-muted-foreground">
-          <p>Kun: {formatCurrency(table.hourlyPrice)}/soat</p>
-          {table.nightPrice && <p>Tun: {formatCurrency(table.nightPrice)}/soat</p>}
+      {!isOccupied && settings && (
+        <div className="text-xs space-y-1 text-muted-foreground">
+          <p className={cn('flex items-center gap-1.5', !isCurrentlyNight && 'text-amber-400 font-medium')}>
+            <Sun className="w-3 h-3" />
+            Kun: {formatCurrency(settings.dayHourlyPrice)}/soat
+          </p>
+          <p className={cn('flex items-center gap-1.5', isCurrentlyNight && 'text-blue-400 font-medium')}>
+            <Moon className="w-3 h-3" />
+            Tun: {formatCurrency(settings.nightHourlyPrice)}/soat
+          </p>
         </div>
       )}
 

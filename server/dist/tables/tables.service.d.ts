@@ -3,15 +3,27 @@ import { CreateTableDto } from './dto/create-table.dto';
 export declare class TablesService {
     private prisma;
     constructor(prisma: PrismaService);
+    private activeSessionInclude;
     findAll(): Promise<{
         activeSession: {
+            customer: {
+                name: string;
+                id: number;
+                createdAt: Date;
+                updatedAt: Date;
+                phone: string;
+                cardNumber: string;
+                bonusBalance: number;
+                telegramId: string | null;
+                telegramUsername: string | null;
+            };
             rounds: {
                 id: number;
                 createdAt: Date;
-                roundNum: number;
-                sessionId: number;
                 startTime: Date;
                 endTime: Date | null;
+                sessionId: number;
+                roundNum: number;
                 minutes: number | null;
                 cost: number | null;
             }[];
@@ -40,9 +52,10 @@ export declare class TablesService {
             createdAt: Date;
             updatedAt: Date;
             status: import(".prisma/client").$Enums.SessionStatus;
+            tableId: number;
+            customerId: number | null;
             startTime: Date;
             endTime: Date | null;
-            tableId: number;
             totalMinutes: number | null;
             playCost: number | null;
         };
@@ -58,13 +71,24 @@ export declare class TablesService {
     }[]>;
     findOne(id: number): Promise<{
         activeSession: {
+            customer: {
+                name: string;
+                id: number;
+                createdAt: Date;
+                updatedAt: Date;
+                phone: string;
+                cardNumber: string;
+                bonusBalance: number;
+                telegramId: string | null;
+                telegramUsername: string | null;
+            };
             rounds: {
                 id: number;
                 createdAt: Date;
-                roundNum: number;
-                sessionId: number;
                 startTime: Date;
                 endTime: Date | null;
+                sessionId: number;
+                roundNum: number;
                 minutes: number | null;
                 cost: number | null;
             }[];
@@ -93,9 +117,10 @@ export declare class TablesService {
             createdAt: Date;
             updatedAt: Date;
             status: import(".prisma/client").$Enums.SessionStatus;
+            tableId: number;
+            customerId: number | null;
             startTime: Date;
             endTime: Date | null;
-            tableId: number;
             totalMinutes: number | null;
             playCost: number | null;
         };

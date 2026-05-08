@@ -55,3 +55,41 @@ export function calcLiveCost(startTime: string, hourlyPrice: number, nightPrice?
   const rate = nightPrice && isNight ? nightPrice : hourlyPrice;
   return Math.round(hours * rate * 100) / 100;
 }
+
+// Splits a time range at day/night boundaries — mirrors backend calcCostSplit exactly.
+export function calcCostMs(
+  startMs: number,
+  endMs: number,
+  dayRate: number,
+  nightRate: number,
+  dayStartHour = 6,
+  nightStartHour = 18,
+): number {
+  let cost = 0;
+  let current = startMs;
+  while (current < endMs) {
+    const d = new Date(current);
+    const h = d.getHours();
+    const isNight = h >= nightStartHour || h < dayStartHour;
+    const rate = isNight ? nightRate : dayRate;
+    const boundary = new Date(d);
+    if (isNight) {
+      if (h >= nightStartHour) {
+        boundary.setDate(boundary.getDate() + 1);
+        boundary.setHours(dayStartHour, 0, 0, 0);
+      } else {
+        boundary.setHours(dayStartHour, 0, 0, 0);
+      }
+    } else {
+      boundary.setHours(nightStartHour, 0, 0, 0);
+    }
+    const segEnd = Math.min(boundary.getTime(), endMs);
+    cost += ((segEnd - current) / 3600000) * rate;
+    current = segEnd;
+  }
+  return Math.round(cost * 100) / 100;
+}
+
+export function parseTimeHour(hhmm: string): number {
+  return parseInt(hhmm.split(':')[0], 10);
+}

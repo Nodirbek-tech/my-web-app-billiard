@@ -1,23 +1,61 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WsService } from '../websocket/ws.service';
+import { SettingsService } from '../settings/settings.service';
 import { TableStatus, SessionStatus } from '@prisma/client';
 import { StopAndPayDto } from './dto/stop-and-pay.dto';
+
+function parseHour(hhmm: string): number {
+  return parseInt(hhmm.split(':')[0], 10);
+}
+
+// Splits a time range at day/night boundaries and returns the total cost.
+function calcCostSplit(
+  start: Date,
+  end: Date,
+  dayRate: number,
+  nightRate: number,
+  dayStartHour: number,
+  nightStartHour: number,
+): number {
+  let cost = 0;
+  let current = start.getTime();
+  const endMs = end.getTime();
+
+  while (current < endMs) {
+    const d = new Date(current);
+    const h = d.getHours();
+    const isNight = h >= nightStartHour || h < dayStartHour;
+    const rate = isNight ? nightRate : dayRate;
+
+    const boundary = new Date(d);
+    if (isNight) {
+      if (h >= nightStartHour) {
+        boundary.setDate(boundary.getDate() + 1);
+        boundary.setHours(dayStartHour, 0, 0, 0);
+      } else {
+        boundary.setHours(dayStartHour, 0, 0, 0);
+      }
+    } else {
+      boundary.setHours(nightStartHour, 0, 0, 0);
+    }
+
+    const segEnd = Math.min(boundary.getTime(), endMs);
+    const segMinutes = (segEnd - current) / 60000;
+    cost += (segMinutes / 60) * rate;
+    current = segEnd;
+  }
+
+  return Math.round(cost * 100) / 100;
+}
 
 @Injectable()
 export class SessionsService {
   constructor(
     private prisma: PrismaService,
     private ws: WsService,
+    private settingsService: SettingsService,
   ) {}
-
-  private calcCost(start: Date, end: Date, dayRate: number, nightRate?: number): number {
-    const minutes = (end.getTime() - start.getTime()) / 60000;
-    const h = start.getHours();
-    const isNight = h >= 18 || h < 6;
-    const rate = nightRate && isNight ? nightRate : dayRate;
-    return Math.round((minutes / 60) * rate * 100) / 100;
-  }
 
   private sessionIncludes() {
     return {
@@ -25,6 +63,7 @@ export class SessionsService {
       orders: { include: { product: true }, orderBy: { createdAt: 'asc' as const } },
       table: true,
       payment: true,
+      customer: true,
     };
   }
 
@@ -54,10 +93,13 @@ export class SessionsService {
   }
 
   async nextRound(sessionId: number) {
-    const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
-      include: { rounds: true, table: true },
-    });
+    const [session, settings] = await Promise.all([
+      this.prisma.session.findUnique({
+        where: { id: sessionId },
+        include: { rounds: true, table: true },
+      }),
+      this.settingsService.get(),
+    ]);
     if (!session) throw new NotFoundException('Session not found');
     if (session.status !== SessionStatus.ACTIVE)
       throw new BadRequestException('Session is not active');
@@ -67,11 +109,13 @@ export class SessionsService {
 
     const now = new Date();
     const minutes = Math.ceil((now.getTime() - activeRound.startTime.getTime()) / 60000);
-    const cost = this.calcCost(
+    const cost = calcCostSplit(
       activeRound.startTime,
       now,
-      session.table.hourlyPrice,
-      session.table.nightPrice ?? undefined,
+      settings.dayHourlyPrice,
+      settings.nightHourlyPrice,
+      parseHour(settings.dayStartTime),
+      parseHour(settings.nightStartTime),
     );
 
     await this.prisma.$transaction([
@@ -93,10 +137,13 @@ export class SessionsService {
   }
 
   async stopSession(sessionId: number) {
-    const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
-      include: { rounds: true, orders: true, table: true },
-    });
+    const [session, settings] = await Promise.all([
+      this.prisma.session.findUnique({
+        where: { id: sessionId },
+        include: { rounds: true, orders: true, table: true },
+      }),
+      this.settingsService.get(),
+    ]);
     if (!session) throw new NotFoundException('Session not found');
     if (session.status !== SessionStatus.ACTIVE)
       throw new BadRequestException('Session is not active');
@@ -106,11 +153,13 @@ export class SessionsService {
 
     if (activeRound) {
       const minutes = Math.ceil((now.getTime() - activeRound.startTime.getTime()) / 60000);
-      const cost = this.calcCost(
+      const cost = calcCostSplit(
         activeRound.startTime,
         now,
-        session.table.hourlyPrice,
-        session.table.nightPrice ?? undefined,
+        settings.dayHourlyPrice,
+        settings.nightHourlyPrice,
+        parseHour(settings.dayStartTime),
+        parseHour(settings.nightStartTime),
       );
       await this.prisma.sessionRound.update({
         where: { id: activeRound.id },
@@ -140,16 +189,49 @@ export class SessionsService {
     return updated;
   }
 
+  async attachCustomer(sessionId: number, customerId: number | null) {
+    const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
+    if (!session) throw new NotFoundException('Session not found');
+    if (session.status !== SessionStatus.ACTIVE)
+      throw new BadRequestException('Session is not active');
+
+    if (customerId !== null) {
+      const customer = await this.prisma.customer.findUnique({ where: { id: customerId } });
+      if (!customer) throw new NotFoundException('Customer not found');
+    }
+
+    const updated = await this.prisma.session.update({
+      where: { id: sessionId },
+      data: { customerId },
+      include: this.sessionIncludes(),
+    });
+
+    this.ws.emitSessionUpdate({ id: sessionId, tableId: session.tableId });
+    return updated;
+  }
+
   // Atomic stop + payment — session stays ACTIVE until this succeeds
   async stopAndPay(sessionId: number, dto: StopAndPayDto) {
-    const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
-      include: { rounds: true, orders: { include: { product: true } }, table: true, payment: true },
-    });
+    const [session, settings] = await Promise.all([
+      this.prisma.session.findUnique({
+        where: { id: sessionId },
+        include: {
+          rounds: true,
+          orders: { include: { product: true } },
+          table: true,
+          payment: true,
+          customer: true,
+        },
+      }),
+      this.settingsService.get(),
+    ]);
     if (!session) throw new NotFoundException('Session not found');
     if (session.status !== SessionStatus.ACTIVE)
       throw new BadRequestException('Session is not active');
     if (session.payment) throw new BadRequestException('Payment already processed');
+
+    const dayStartHour = parseHour(settings.dayStartTime);
+    const nightStartHour = parseHour(settings.nightStartTime);
 
     const now = new Date();
     const activeRound = session.rounds.find((r) => !r.endTime);
@@ -157,9 +239,13 @@ export class SessionsService {
     let closedRound: { id: number; minutes: number; cost: number; endTime: Date } | null = null;
     if (activeRound) {
       const minutes = Math.ceil((now.getTime() - activeRound.startTime.getTime()) / 60000);
-      const cost = this.calcCost(
-        activeRound.startTime, now,
-        session.table.hourlyPrice, session.table.nightPrice ?? undefined,
+      const cost = calcCostSplit(
+        activeRound.startTime,
+        now,
+        settings.dayHourlyPrice,
+        settings.nightHourlyPrice,
+        dayStartHour,
+        nightStartHour,
       );
       closedRound = { id: activeRound.id, minutes, cost, endTime: now };
     }
@@ -175,7 +261,21 @@ export class SessionsService {
     const orderCost = Math.round(session.orders.reduce((s, o) => s + o.total, 0) * 100) / 100;
     const discount = Math.round((dto.discount ?? 0) * 100) / 100;
     const serviceFee = Math.round((dto.serviceFee ?? 0) * 100) / 100;
-    const totalCost = Math.max(0, Math.round((playCost + orderCost + serviceFee - discount) * 100) / 100);
+
+    const customer = session.customer;
+    const rawBonusRedeemed = dto.bonusRedeemed ?? 0;
+    const bonusRedeemed = customer
+      ? Math.min(rawBonusRedeemed, customer.bonusBalance)
+      : 0;
+
+    const grossCost = Math.max(0, Math.round((playCost + orderCost + serviceFee - discount) * 100) / 100);
+    const totalCost = Math.max(0, Math.round((grossCost - bonusRedeemed) * 100) / 100);
+
+    let bonusEarned = 0;
+    if (customer) {
+      bonusEarned = Math.round(totalCost * settings.cashbackPercent) / 100;
+    }
+
     const cashAmount = dto.cashAmount ?? null;
     const cardAmount = dto.cardAmount ?? null;
     const change =
@@ -194,7 +294,7 @@ export class SessionsService {
         where: { id: sessionId },
         data: { endTime: now, totalMinutes, playCost, status: SessionStatus.COMPLETED },
       });
-      const p = await (tx.payment.create as any)({
+      const p = await tx.payment.create({
         data: {
           sessionId,
           playCost,
@@ -207,14 +307,40 @@ export class SessionsService {
           cardAmount,
           notes: dto.notes ?? null,
           cashierName: dto.cashierName ?? null,
+          customerId: customer?.id ?? null,
+          bonusRedeemed,
+          bonusEarned,
         },
       });
+
+      if (customer) {
+        await tx.customerVisit.create({
+          data: {
+            customerId: customer.id,
+            sessionId,
+            playCost,
+            orderCost,
+            totalCost,
+            bonusEarned,
+            bonusRedeemed,
+          },
+        });
+        await tx.customer.update({
+          where: { id: customer.id },
+          data: { bonusBalance: { increment: bonusEarned - bonusRedeemed } },
+        });
+      }
+
       await tx.table.update({
         where: { id: session.tableId },
         data: { status: TableStatus.AVAILABLE },
       });
       return p;
     });
+
+    const newBonusBalance = customer
+      ? Math.max(0, customer.bonusBalance + bonusEarned - bonusRedeemed)
+      : null;
 
     const receiptData = {
       receiptNumber: `RC-${String(payment.id).padStart(6, '0')}`,
@@ -243,6 +369,8 @@ export class SessionsService {
       orderCost,
       serviceFee,
       discount,
+      bonusRedeemed,
+      bonusEarned,
       totalCost,
       method: dto.method,
       cashAmount,
@@ -250,6 +378,9 @@ export class SessionsService {
       change,
       notes: dto.notes ?? null,
       paidAt: payment.paidAt.toISOString(),
+      customerName: customer?.name ?? null,
+      customerCard: customer?.cardNumber ?? null,
+      bonusBalance: newBonusBalance,
     };
 
     this.ws.emitTableUpdate({ id: session.tableId, status: TableStatus.AVAILABLE });

@@ -1,11 +1,14 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../server/node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ─── Users ────────────────────────────────────────────────────────────────────
 
 model User {
   id        Int      @id @default(autoincrement())
@@ -23,6 +26,8 @@ enum Role {
   ADMIN
   STAFF
 }
+
+// ─── Tables ───────────────────────────────────────────────────────────────────
 
 model Table {
   id          Int         @id @default(autoincrement())
@@ -44,24 +49,30 @@ enum TableStatus {
   OCCUPIED
 }
 
+// ─── Sessions ─────────────────────────────────────────────────────────────────
+
 model Session {
-  id           Int           @id @default(autoincrement())
+  id           Int            @id @default(autoincrement())
   tableId      Int
-  table        Table         @relation(fields: [tableId], references: [id])
+  table        Table          @relation(fields: [tableId], references: [id])
+  customerId   Int?
+  customer     Customer?      @relation(fields: [customerId], references: [id])
   startTime    DateTime
   endTime      DateTime?
   totalMinutes Int?
   playCost     Float?
-  status       SessionStatus @default(ACTIVE)
+  status       SessionStatus  @default(ACTIVE)
   rounds       SessionRound[]
   orders       SessionOrder[]
   payment      Payment?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  visit        CustomerVisit?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([tableId, status])
   @@index([status])
   @@index([createdAt])
+  @@index([customerId])
 }
 
 enum SessionStatus {
@@ -83,6 +94,8 @@ model SessionRound {
 
   @@index([sessionId])
 }
+
+// ─── Products & Orders ────────────────────────────────────────────────────────
 
 model Category {
   id        Int       @id @default(autoincrement())
@@ -123,28 +136,81 @@ model SessionOrder {
   @@index([sessionId])
 }
 
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
 model Payment {
-  id          Int           @id @default(autoincrement())
-  sessionId   Int           @unique
-  session     Session       @relation(fields: [sessionId], references: [id])
-  playCost    Float
-  orderCost   Float
-  discount    Float         @default(0)
-  serviceFee  Float         @default(0)
-  totalCost   Float
-  method      PaymentMethod
-  cashAmount  Float?
-  cardAmount  Float?
-  notes       String?
-  cashierName String?
-  paidAt      DateTime      @default(now())
-  createdAt   DateTime      @default(now())
+  id            Int           @id @default(autoincrement())
+  sessionId     Int           @unique
+  session       Session       @relation(fields: [sessionId], references: [id])
+  customerId    Int?
+  playCost      Float
+  orderCost     Float
+  discount      Float         @default(0)
+  serviceFee    Float         @default(0)
+  bonusRedeemed Float         @default(0)
+  bonusEarned   Float         @default(0)
+  totalCost     Float
+  method        PaymentMethod
+  cashAmount    Float?
+  cardAmount    Float?
+  notes         String?
+  cashierName   String?
+  paidAt        DateTime      @default(now())
+  createdAt     DateTime      @default(now())
 
   @@index([paidAt])
+  @@index([customerId])
 }
 
 enum PaymentMethod {
   CASH
   CARD
   MIXED
+}
+
+// ─── Customers & Loyalty ──────────────────────────────────────────────────────
+
+model Customer {
+  id               Int             @id @default(autoincrement())
+  name             String
+  phone            String          @unique
+  cardNumber       String          @unique
+  bonusBalance     Float           @default(0)
+  // Telegram fields — Phase 2 only, not used in Phase 1
+  telegramId       String?         @unique
+  telegramUsername String?
+  sessions         Session[]
+  visits           CustomerVisit[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([phone])
+  @@index([cardNumber])
+}
+
+model CustomerVisit {
+  id            Int      @id @default(autoincrement())
+  customerId    Int
+  customer      Customer @relation(fields: [customerId], references: [id])
+  sessionId     Int      @unique
+  session       Session  @relation(fields: [sessionId], references: [id])
+  playCost      Float    @default(0)
+  orderCost     Float    @default(0)
+  totalCost     Float    @default(0)
+  bonusEarned   Float    @default(0)
+  bonusRedeemed Float    @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([customerId])
+}
+
+// ─── Business Settings (singleton: id = 1) ────────────────────────────────────
+
+model BusinessSettings {
+  id               Int    @id @default(1)
+  cashbackPercent  Float  @default(5)
+  dayHourlyPrice   Float  @default(40000)
+  nightHourlyPrice Float  @default(50000)
+  dayStartTime     String @default("06:00")
+  nightStartTime   String @default("18:00")
 }

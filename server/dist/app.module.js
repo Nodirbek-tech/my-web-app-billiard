@@ -19,6 +19,9 @@ const orders_module_1 = require("./orders/orders.module");
 const payments_module_1 = require("./payments/payments.module");
 const reports_module_1 = require("./reports/reports.module");
 const ws_module_1 = require("./websocket/ws.module");
+const customers_module_1 = require("./customers/customers.module");
+const settings_module_1 = require("./settings/settings.module");
+const telegram_module_1 = require("./telegram/telegram.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,6 +39,9 @@ exports.AppModule = AppModule = __decorate([
             payments_module_1.PaymentsModule,
             reports_module_1.ReportsModule,
             ws_module_1.WsModule,
+            customers_module_1.CustomersModule,
+            settings_module_1.SettingsModule,
+            telegram_module_1.TelegramModule,
         ],
     })
 ], AppModule);
