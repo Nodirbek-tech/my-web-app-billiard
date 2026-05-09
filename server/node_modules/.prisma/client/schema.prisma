@@ -176,16 +176,18 @@ model Customer {
   phone            String          @unique
   cardNumber       String          @unique
   bonusBalance     Float           @default(0)
-  // Telegram fields — Phase 2 only, not used in Phase 1
   telegramId       String?         @unique
   telegramUsername String?
+  qrCodeValue      String?         @unique
   sessions         Session[]
   visits           CustomerVisit[]
+  reservations     Reservation[]
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
   @@index([phone])
   @@index([cardNumber])
+  @@index([telegramId])
 }
 
 model CustomerVisit {
@@ -213,4 +215,56 @@ model BusinessSettings {
   nightHourlyPrice Float  @default(50000)
   dayStartTime     String @default("06:00")
   nightStartTime   String @default("18:00")
+  address          String @default("Manzil ko'rsatilmagan")
+  contactPhone     String @default("+998 XX XXX XX XX")
+}
+
+// ─── Reservations ─────────────────────────────────────────────────────────────
+
+model Reservation {
+  id          Int               @id @default(autoincrement())
+  customerId  Int?
+  customer    Customer?         @relation(fields: [customerId], references: [id])
+  name        String
+  phone       String
+  date        DateTime
+  peopleCount Int               @default(1)
+  note        String?
+  status      ReservationStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([status])
+  @@index([date])
+  @@index([customerId])
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+// ─── Promotions ───────────────────────────────────────────────────────────────
+
+model Promotion {
+  id        Int                @id @default(autoincrement())
+  title     String
+  message   String
+  active    Boolean            @default(true)
+  sendLogs  PromotionSendLog[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model PromotionSendLog {
+  id          Int       @id @default(autoincrement())
+  promotionId Int
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  customerId  Int
+  sentAt      DateTime  @default(now())
+
+  @@unique([promotionId, customerId])
+  @@index([promotionId])
+  @@index([customerId])
 }

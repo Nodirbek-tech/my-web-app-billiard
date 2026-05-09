@@ -3,6 +3,7 @@ import { LayoutDashboard } from 'lucide-react';
 import { tablesApi } from '@/api/tables';
 import { settingsApi } from '@/api/settings';
 import { useUiStore } from '@/store/uiStore';
+import { useTableSocket } from '@/hooks/useTableSocket';
 import { Skeleton } from '@/components/ui/skeleton';
 import TableCard from '@/components/tables/TableCard';
 import AddTableDialog from '@/components/tables/AddTableDialog';
@@ -23,10 +24,14 @@ function TablesSkeleton() {
 export default function DashboardPage() {
   const { selectedTableId, setSelectedTable } = useUiStore();
 
+  // WebSocket: real-time table/session updates — polling is a 30s fallback only
+  useTableSocket();
+
   const { data: tables = [], isLoading } = useQuery({
     queryKey: ['tables'],
     queryFn: tablesApi.getAll,
-    refetchInterval: 10_000,
+    refetchInterval: 30_000,
+    staleTime: 20_000,
   });
 
   const { data: settings } = useQuery({

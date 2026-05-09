@@ -11,8 +11,9 @@ export declare class CustomersService {
         updatedAt: Date;
         phone: string;
         cardNumber: string;
-        bonusBalance: number;
         telegramId: string | null;
+        qrCodeValue: string | null;
+        bonusBalance: number;
         telegramUsername: string | null;
     }>;
     findAll(search?: string): Promise<({
@@ -26,8 +27,9 @@ export declare class CustomersService {
         updatedAt: Date;
         phone: string;
         cardNumber: string;
-        bonusBalance: number;
         telegramId: string | null;
+        qrCodeValue: string | null;
+        bonusBalance: number;
         telegramUsername: string | null;
     })[]>;
     findOne(id: number): Promise<{
@@ -64,10 +66,10 @@ export declare class CustomersService {
             customerId: number;
             playCost: number;
             sessionId: number;
-            bonusRedeemed: number;
             orderCost: number;
-            bonusEarned: number;
             totalCost: number;
+            bonusEarned: number;
+            bonusRedeemed: number;
         })[];
     } & {
         name: string;
@@ -76,8 +78,9 @@ export declare class CustomersService {
         updatedAt: Date;
         phone: string;
         cardNumber: string;
-        bonusBalance: number;
         telegramId: string | null;
+        qrCodeValue: string | null;
+        bonusBalance: number;
         telegramUsername: string | null;
     }>;
     findByPhone(phone: string): Promise<{
@@ -87,8 +90,9 @@ export declare class CustomersService {
         updatedAt: Date;
         phone: string;
         cardNumber: string;
-        bonusBalance: number;
         telegramId: string | null;
+        qrCodeValue: string | null;
+        bonusBalance: number;
         telegramUsername: string | null;
     }[]>;
     update(id: number, dto: UpdateCustomerDto): Promise<{
@@ -98,8 +102,9 @@ export declare class CustomersService {
         updatedAt: Date;
         phone: string;
         cardNumber: string;
-        bonusBalance: number;
         telegramId: string | null;
+        qrCodeValue: string | null;
+        bonusBalance: number;
         telegramUsername: string | null;
     }>;
     remove(id: number): Promise<{
@@ -109,8 +114,9 @@ export declare class CustomersService {
         updatedAt: Date;
         phone: string;
         cardNumber: string;
-        bonusBalance: number;
         telegramId: string | null;
+        qrCodeValue: string | null;
+        bonusBalance: number;
         telegramUsername: string | null;
     }>;
 }

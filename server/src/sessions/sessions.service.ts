@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WsService } from '../websocket/ws.service';
 import { SettingsService } from '../settings/settings.service';
+import { TelegramService } from '../telegram/telegram.service';
 import { TableStatus, SessionStatus } from '@prisma/client';
 import { StopAndPayDto } from './dto/stop-and-pay.dto';
+import type { BusinessSettings } from '@prisma/client';
 
 function parseHour(hhmm: string): number {
   return parseInt(hhmm.split(':')[0], 10);
@@ -51,12 +53,28 @@ function calcCostSplit(
 
 @Injectable()
 export class SessionsService {
+  private readonly logger = new Logger(SessionsService.name);
+  private settingsCache: { data: BusinessSettings; expiresAt: number } | null = null;
+
   constructor(
     private prisma: PrismaService,
     private ws: WsService,
     private settingsService: SettingsService,
+    private telegram: TelegramService,
   ) {}
 
+  // 60-second in-memory settings cache — avoids a DB round-trip on every session op
+  private async getSettings(): Promise<BusinessSettings> {
+    const now = Date.now();
+    if (this.settingsCache && now < this.settingsCache.expiresAt) {
+      return this.settingsCache.data;
+    }
+    const data = await this.settingsService.get();
+    this.settingsCache = { data, expiresAt: now + 60_000 };
+    return data;
+  }
+
+  // Full includes — used when the response is displayed in SessionPanel
   private sessionIncludes() {
     return {
       rounds: { orderBy: { roundNum: 'asc' as const } },
@@ -67,8 +85,20 @@ export class SessionsService {
     };
   }
 
+  // Lean includes — used for start/next-round/stop where orders/customer aren't needed
+  private leanIncludes() {
+    return {
+      rounds: { orderBy: { roundNum: 'asc' as const } },
+      table: true,
+    };
+  }
+
   async startSession(tableId: number) {
-    const table = await this.prisma.table.findUnique({ where: { id: tableId } });
+    const t0 = Date.now();
+    const table = await this.prisma.table.findUnique({
+      where: { id: tableId },
+      select: { id: true, status: true },
+    });
     if (!table) throw new NotFoundException('Table not found');
     if (table.status !== TableStatus.AVAILABLE)
       throw new BadRequestException('Table is already occupied');
@@ -82,23 +112,30 @@ export class SessionsService {
           status: SessionStatus.ACTIVE,
           rounds: { create: { roundNum: 1, startTime: now } },
         },
-        include: this.sessionIncludes(),
+        include: this.leanIncludes(),
       });
       await tx.table.update({ where: { id: tableId }, data: { status: TableStatus.OCCUPIED } });
       return s;
     });
 
     this.ws.emitTableUpdate({ id: tableId, status: TableStatus.OCCUPIED });
+    const ms = Date.now() - t0;
+    if (ms > 150) this.logger.warn(`startSession(${tableId}) ${ms}ms`);
     return session;
   }
 
   async nextRound(sessionId: number) {
+    const t0 = Date.now();
     const [session, settings] = await Promise.all([
       this.prisma.session.findUnique({
         where: { id: sessionId },
-        include: { rounds: true, table: true },
+        select: {
+          id: true, tableId: true, status: true,
+          rounds: { orderBy: { roundNum: 'asc' as const } },
+          table: { select: { id: true } },
+        },
       }),
-      this.settingsService.get(),
+      this.getSettings(),
     ]);
     if (!session) throw new NotFoundException('Session not found');
     if (session.status !== SessionStatus.ACTIVE)
@@ -130,19 +167,26 @@ export class SessionsService {
 
     const updated = await this.prisma.session.findUnique({
       where: { id: sessionId },
-      include: this.sessionIncludes(),
+      include: this.leanIncludes(),
     });
     this.ws.emitSessionUpdate({ id: sessionId, tableId: session.tableId });
+    const ms = Date.now() - t0;
+    if (ms > 150) this.logger.warn(`nextRound(${sessionId}) ${ms}ms`);
     return updated;
   }
 
   async stopSession(sessionId: number) {
+    const t0 = Date.now();
     const [session, settings] = await Promise.all([
       this.prisma.session.findUnique({
         where: { id: sessionId },
-        include: { rounds: true, orders: true, table: true },
+        select: {
+          id: true, tableId: true, status: true,
+          rounds: { orderBy: { roundNum: 'asc' as const } },
+          orders: { select: { id: true } },
+        },
       }),
-      this.settingsService.get(),
+      this.getSettings(),
     ]);
     if (!session) throw new NotFoundException('Session not found');
     if (session.status !== SessionStatus.ACTIVE)
@@ -175,7 +219,7 @@ export class SessionsService {
       const s = await tx.session.update({
         where: { id: sessionId },
         data: { endTime: now, totalMinutes, playCost, status: SessionStatus.COMPLETED },
-        include: this.sessionIncludes(),
+        include: this.leanIncludes(),
       });
       await tx.table.update({
         where: { id: session.tableId },
@@ -186,6 +230,8 @@ export class SessionsService {
 
     this.ws.emitTableUpdate({ id: session.tableId, status: TableStatus.AVAILABLE });
     this.ws.emitSessionUpdate({ id: sessionId, tableId: session.tableId });
+    const ms = Date.now() - t0;
+    if (ms > 200) this.logger.warn(`stopSession(${sessionId}) ${ms}ms`);
     return updated;
   }
 
@@ -212,6 +258,7 @@ export class SessionsService {
 
   // Atomic stop + payment — session stays ACTIVE until this succeeds
   async stopAndPay(sessionId: number, dto: StopAndPayDto) {
+    const t0 = Date.now();
     const [session, settings] = await Promise.all([
       this.prisma.session.findUnique({
         where: { id: sessionId },
@@ -223,7 +270,7 @@ export class SessionsService {
           customer: true,
         },
       }),
-      this.settingsService.get(),
+      this.getSettings(),
     ]);
     if (!session) throw new NotFoundException('Session not found');
     if (session.status !== SessionStatus.ACTIVE)
@@ -385,6 +432,20 @@ export class SessionsService {
 
     this.ws.emitTableUpdate({ id: session.tableId, status: TableStatus.AVAILABLE });
     this.ws.emitSessionUpdate({ id: sessionId, tableId: session.tableId });
+
+    // Fire-and-forget — never blocks the payment response
+    if (customer?.telegramId) {
+      this.telegram.notifyPayment(customer.id, {
+        tableName: session.table.name,
+        totalMinutes,
+        totalCost,
+        bonusEarned,
+        bonusBalance: newBonusBalance ?? 0,
+      }).catch(() => {});
+    }
+
+    const ms = Date.now() - t0;
+    if (ms > 300) this.logger.warn(`stopAndPay(${sessionId}) ${ms}ms`);
     return receiptData;
   }
 

@@ -3,20 +3,13 @@ import { CreateTableDto } from './dto/create-table.dto';
 export declare class TablesService {
     private prisma;
     constructor(prisma: PrismaService);
-    private activeSessionInclude;
+    private leanSessionInclude;
+    private fullSessionInclude;
     findAll(): Promise<{
         activeSession: {
-            customer: {
-                name: string;
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                phone: string;
-                cardNumber: string;
-                bonusBalance: number;
-                telegramId: string | null;
-                telegramUsername: string | null;
-            };
+            orders: any[];
+            customer: any;
+            payment: any;
             rounds: {
                 id: number;
                 createdAt: Date;
@@ -27,27 +20,6 @@ export declare class TablesService {
                 minutes: number | null;
                 cost: number | null;
             }[];
-            orders: ({
-                product: {
-                    name: string;
-                    id: number;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    price: number;
-                    categoryId: number;
-                    stock: number | null;
-                    active: boolean;
-                };
-            } & {
-                id: number;
-                createdAt: Date;
-                sessionId: number;
-                productId: number;
-                quantity: number;
-                unitPrice: number;
-                total: number;
-            })[];
-        } & {
             id: number;
             createdAt: Date;
             updatedAt: Date;
@@ -71,6 +43,25 @@ export declare class TablesService {
     }[]>;
     findOne(id: number): Promise<{
         activeSession: {
+            payment: {
+                id: number;
+                createdAt: Date;
+                customerId: number | null;
+                playCost: number;
+                sessionId: number;
+                method: import(".prisma/client").$Enums.PaymentMethod;
+                orderCost: number;
+                totalCost: number;
+                bonusEarned: number;
+                bonusRedeemed: number;
+                discount: number;
+                serviceFee: number;
+                cashAmount: number | null;
+                cardAmount: number | null;
+                notes: string | null;
+                cashierName: string | null;
+                paidAt: Date;
+            };
             customer: {
                 name: string;
                 id: number;
@@ -78,8 +69,9 @@ export declare class TablesService {
                 updatedAt: Date;
                 phone: string;
                 cardNumber: string;
-                bonusBalance: number;
                 telegramId: string | null;
+                qrCodeValue: string | null;
+                bonusBalance: number;
                 telegramUsername: string | null;
             };
             rounds: {
@@ -98,10 +90,10 @@ export declare class TablesService {
                     id: number;
                     createdAt: Date;
                     updatedAt: Date;
+                    active: boolean;
                     price: number;
                     categoryId: number;
                     stock: number | null;
-                    active: boolean;
                 };
             } & {
                 id: number;

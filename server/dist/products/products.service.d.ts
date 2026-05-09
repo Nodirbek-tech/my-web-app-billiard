@@ -10,10 +10,10 @@ export declare class ProductsService {
             id: number;
             createdAt: Date;
             updatedAt: Date;
+            active: boolean;
             price: number;
             categoryId: number;
             stock: number | null;
-            active: boolean;
         }[];
     } & {
         name: string;
@@ -49,10 +49,10 @@ export declare class ProductsService {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     })[]>;
     findProductById(id: number): Promise<{
         category: {
@@ -67,10 +67,10 @@ export declare class ProductsService {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     }>;
     createProduct(dto: CreateProductDto): Promise<{
         category: {
@@ -85,10 +85,10 @@ export declare class ProductsService {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     }>;
     updateProduct(id: number, dto: Partial<CreateProductDto>): Promise<{
         category: {
@@ -103,19 +103,19 @@ export declare class ProductsService {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     }>;
     removeProduct(id: number): Promise<{
         name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     }>;
 }

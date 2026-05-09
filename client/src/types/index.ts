@@ -2,6 +2,7 @@ export type Role = 'ADMIN' | 'STAFF';
 export type TableStatus = 'AVAILABLE' | 'OCCUPIED';
 export type SessionStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 export type PaymentMethod = 'CASH' | 'CARD' | 'MIXED';
+export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED';
 
 export interface AuthUser {
   id: number;
@@ -15,7 +16,9 @@ export interface Customer {
   name: string;
   phone: string;
   cardNumber: string;
+  qrCodeValue?: string | null;
   bonusBalance: number;
+  telegramId?: string | null;
   createdAt: string;
   _count?: { visits: number };
 }
@@ -45,6 +48,37 @@ export interface BusinessSettings {
   nightHourlyPrice: number;
   dayStartTime: string;
   nightStartTime: string;
+  address?: string;
+  contactPhone?: string;
+}
+
+export interface Reservation {
+  id: number;
+  name: string;
+  phone: string;
+  date: string;
+  peopleCount: number;
+  note?: string | null;
+  status: ReservationStatus;
+  customerId?: number | null;
+  customer?: Customer | null;
+  createdAt: string;
+}
+
+export interface Promotion {
+  id: number;
+  title: string;
+  message: string;
+  active: boolean;
+  createdAt: string;
+  _count?: { sendLogs: number };
+}
+
+export interface PromotionSendLog {
+  id: number;
+  promotionId: number;
+  customerId: number;
+  sentAt: string;
 }
 
 export interface Table {
@@ -68,7 +102,7 @@ export interface Session {
   playCost?: number | null;
   status: SessionStatus;
   rounds: SessionRound[];
-  orders: SessionOrder[];
+  orders?: SessionOrder[];
   payment?: Payment | null;
   customerId?: number | null;
   customer?: Customer | null;

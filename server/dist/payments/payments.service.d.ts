@@ -33,10 +33,10 @@ export declare class PaymentsService {
                     id: number;
                     createdAt: Date;
                     updatedAt: Date;
+                    active: boolean;
                     price: number;
                     categoryId: number;
                     stock: number | null;
-                    active: boolean;
                 };
             } & {
                 id: number;
@@ -65,17 +65,17 @@ export declare class PaymentsService {
         customerId: number | null;
         playCost: number;
         sessionId: number;
+        method: import(".prisma/client").$Enums.PaymentMethod;
+        orderCost: number;
+        totalCost: number;
+        bonusEarned: number;
+        bonusRedeemed: number;
         discount: number;
         serviceFee: number;
-        method: import(".prisma/client").$Enums.PaymentMethod;
         cashAmount: number | null;
         cardAmount: number | null;
         notes: string | null;
         cashierName: string | null;
-        bonusRedeemed: number;
-        orderCost: number;
-        bonusEarned: number;
-        totalCost: number;
         paidAt: Date;
     }>;
     getPaymentBySession(sessionId: number): Promise<{
@@ -106,10 +106,10 @@ export declare class PaymentsService {
                     id: number;
                     createdAt: Date;
                     updatedAt: Date;
+                    active: boolean;
                     price: number;
                     categoryId: number;
                     stock: number | null;
-                    active: boolean;
                 };
             } & {
                 id: number;
@@ -138,17 +138,17 @@ export declare class PaymentsService {
         customerId: number | null;
         playCost: number;
         sessionId: number;
+        method: import(".prisma/client").$Enums.PaymentMethod;
+        orderCost: number;
+        totalCost: number;
+        bonusEarned: number;
+        bonusRedeemed: number;
         discount: number;
         serviceFee: number;
-        method: import(".prisma/client").$Enums.PaymentMethod;
         cashAmount: number | null;
         cardAmount: number | null;
         notes: string | null;
         cashierName: string | null;
-        bonusRedeemed: number;
-        orderCost: number;
-        bonusEarned: number;
-        totalCost: number;
         paidAt: Date;
     }>;
     getReceiptData(sessionId: number): Promise<{

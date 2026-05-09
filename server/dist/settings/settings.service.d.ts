@@ -5,6 +5,8 @@ export interface UpdateSettingsData {
     nightHourlyPrice?: number;
     dayStartTime?: string;
     nightStartTime?: string;
+    address?: string;
+    contactPhone?: string;
 }
 export declare class SettingsService {
     private prisma;
@@ -16,6 +18,8 @@ export declare class SettingsService {
         nightHourlyPrice: number;
         dayStartTime: string;
         nightStartTime: string;
+        address: string;
+        contactPhone: string;
     }>;
     update(data: UpdateSettingsData): Promise<{
         id: number;
@@ -24,5 +28,7 @@ export declare class SettingsService {
         nightHourlyPrice: number;
         dayStartTime: string;
         nightStartTime: string;
+        address: string;
+        contactPhone: string;
     }>;
 }

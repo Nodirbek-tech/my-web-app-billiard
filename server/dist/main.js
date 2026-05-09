@@ -5,8 +5,21 @@ const app_module_1 = require("./app.module");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const platform_socket_io_1 = require("@nestjs/platform-socket.io");
+const compression = require('compression');
+const logger = new common_1.Logger('HTTP');
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, { bufferLogs: true });
+    app.use(compression());
+    app.use((req, res, next) => {
+        const start = Date.now();
+        res.on('finish', () => {
+            const ms = Date.now() - start;
+            if (ms > 300) {
+                logger.warn(`SLOW ${req.method} ${req.url} — ${ms}ms [${res.statusCode}]`);
+            }
+        });
+        next();
+    });
     app.enableCors({
         origin: process.env.CLIENT_URL || 'http://localhost:5173',
         credentials: true,

@@ -17,32 +17,44 @@ let TablesService = class TablesService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    activeSessionInclude() {
+    leanSessionInclude() {
         return {
             where: { status: client_1.SessionStatus.ACTIVE },
             take: 1,
             include: {
                 rounds: { orderBy: { roundNum: 'asc' } },
-                orders: { include: { product: true } },
+            },
+        };
+    }
+    fullSessionInclude() {
+        return {
+            where: { status: client_1.SessionStatus.ACTIVE },
+            take: 1,
+            include: {
+                rounds: { orderBy: { roundNum: 'asc' } },
+                orders: { include: { product: true }, orderBy: { createdAt: 'asc' } },
                 customer: true,
+                payment: true,
             },
         };
     }
     async findAll() {
         const tables = await this.prisma.table.findMany({
             orderBy: { number: 'asc' },
-            include: { sessions: this.activeSessionInclude() },
+            include: { sessions: this.leanSessionInclude() },
         });
         return tables.map((t) => ({
             ...t,
-            activeSession: t.sessions[0] || null,
+            activeSession: t.sessions[0]
+                ? { ...t.sessions[0], orders: [], customer: null, payment: null }
+                : null,
             sessions: undefined,
         }));
     }
     async findOne(id) {
         const table = await this.prisma.table.findUnique({
             where: { id },
-            include: { sessions: this.activeSessionInclude() },
+            include: { sessions: this.fullSessionInclude() },
         });
         if (!table)
             throw new common_1.NotFoundException('Table not found');

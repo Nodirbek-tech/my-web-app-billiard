@@ -7,14 +7,27 @@ import { SessionStatus } from '@prisma/client';
 export class TablesService {
   constructor(private prisma: PrismaService) {}
 
-  private activeSessionInclude() {
+  // Lean — only what TableCard needs (timer + round count). No orders/products/customer.
+  private leanSessionInclude() {
     return {
       where: { status: SessionStatus.ACTIVE },
       take: 1,
       include: {
         rounds: { orderBy: { roundNum: 'asc' as const } },
-        orders: { include: { product: true } },
+      },
+    } as const;
+  }
+
+  // Full — needed by SessionPanel to show orders, customer, completed rounds.
+  private fullSessionInclude() {
+    return {
+      where: { status: SessionStatus.ACTIVE },
+      take: 1,
+      include: {
+        rounds: { orderBy: { roundNum: 'asc' as const } },
+        orders: { include: { product: true }, orderBy: { createdAt: 'asc' as const } },
         customer: true,
+        payment: true,
       },
     } as const;
   }
@@ -22,12 +35,15 @@ export class TablesService {
   async findAll() {
     const tables = await this.prisma.table.findMany({
       orderBy: { number: 'asc' },
-      include: { sessions: this.activeSessionInclude() },
+      include: { sessions: this.leanSessionInclude() },
     });
 
     return tables.map((t) => ({
       ...t,
-      activeSession: t.sessions[0] || null,
+      // Backfill optional fields so frontend types stay satisfied
+      activeSession: t.sessions[0]
+        ? { ...t.sessions[0], orders: [] as any[], customer: null as any, payment: null as any }
+        : null,
       sessions: undefined,
     }));
   }
@@ -35,7 +51,7 @@ export class TablesService {
   async findOne(id: number) {
     const table = await this.prisma.table.findUnique({
       where: { id },
-      include: { sessions: this.activeSessionInclude() },
+      include: { sessions: this.fullSessionInclude() },
     });
     if (!table) throw new NotFoundException('Table not found');
     return { ...table, activeSession: table.sessions[0] || null, sessions: undefined };

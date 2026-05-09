@@ -10,10 +10,10 @@ export declare class ProductsController {
             id: number;
             createdAt: Date;
             updatedAt: Date;
+            active: boolean;
             price: number;
             categoryId: number;
             stock: number | null;
-            active: boolean;
         }[];
     } & {
         name: string;
@@ -49,10 +49,10 @@ export declare class ProductsController {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     })[]>;
     create(dto: CreateProductDto): Promise<{
         category: {
@@ -67,10 +67,10 @@ export declare class ProductsController {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     }>;
     update(id: number, dto: Partial<CreateProductDto>): Promise<{
         category: {
@@ -85,19 +85,19 @@ export declare class ProductsController {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     }>;
     remove(id: number): Promise<{
         name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
+        active: boolean;
         price: number;
         categoryId: number;
         stock: number | null;
-        active: boolean;
     }>;
 }

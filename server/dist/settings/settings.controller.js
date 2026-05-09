@@ -60,6 +60,18 @@ __decorate([
     (0, class_validator_1.Matches)(/^\d{2}:\d{2}$/),
     __metadata("design:type", String)
 ], UpdateSettingsDto.prototype, "nightStartTime", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateSettingsDto.prototype, "address", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateSettingsDto.prototype, "contactPhone", void 0);
 let SettingsController = class SettingsController {
     constructor(settings) {
         this.settings = settings;

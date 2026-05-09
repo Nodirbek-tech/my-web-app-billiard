@@ -189,9 +189,9 @@ export default function PaymentDialog({ session, table, settings, open, onCancel
                   <Separator />
                   <div className="p-3 space-y-1.5">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                      <ShoppingCart className="w-3.5 h-3.5" /> Mahsulotlar ({session.orders.length})
+                      <ShoppingCart className="w-3.5 h-3.5" /> Mahsulotlar ({session.orders?.length ?? 0})
                     </p>
-                    {session.orders.map((o) => (
+                    {(session.orders ?? []).map((o) => (
                       <div key={o.id} className="flex items-center justify-between">
                         <span className="text-muted-foreground">
                           {o.product.name} x{o.quantity}

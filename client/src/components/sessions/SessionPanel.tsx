@@ -16,7 +16,7 @@ import OrderList from '@/components/orders/OrderList';
 import AddOrderDialog from '@/components/orders/AddOrderDialog';
 import PaymentDialog from '@/components/payments/PaymentDialog';
 import CustomerSearch from '@/components/customers/CustomerSearch';
-import type { Table, BusinessSettings } from '@/types';
+import type { Table, BusinessSettings, Session } from '@/types';
 
 interface SessionTimerProps {
   startTime: string;
@@ -63,10 +63,11 @@ export default function SessionPanel({ table, settings }: SessionPanelProps) {
   const { setSelectedTable, setReceiptData } = useUiStore();
   const qc = useQueryClient();
 
+  // No polling — WsHook (useTableSocket) pushes targeted updates to ['tables', table.id]
   const { data: tableData, isLoading } = useQuery({
     queryKey: ['tables', table.id],
     queryFn: () => tablesApi.getOne(table.id),
-    refetchInterval: 5000,
+    staleTime: 10_000,
   });
 
   const currentTable = tableData ?? table;
@@ -82,7 +83,8 @@ export default function SessionPanel({ table, settings }: SessionPanelProps) {
   const { mutate: nextRound, isPending: isNextRound } = useMutation({
     mutationFn: () => sessionsApi.nextRound(session!.id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tables'] });
+      // Targeted: only refetch this one table, not the whole list
+      qc.invalidateQueries({ queryKey: ['tables', table.id] });
       toast.success('Keyingi raund boshlandi!');
     },
     onError: (err: any) => toast.error(err.response?.data?.message || "Xatolik yuz berdi"),
@@ -243,7 +245,12 @@ export default function SessionPanel({ table, settings }: SessionPanelProps) {
           onSuccess={(receipt) => {
             setShowPayment(false);
             setSelectedTable(null);
-            qc.invalidateQueries({ queryKey: ['tables'] });
+            // Immediately mark this table as available in the cache — no full refetch
+            qc.setQueryData<Table[]>(['tables'], (old) =>
+              old?.map((t) =>
+                t.id === table.id ? { ...t, status: 'AVAILABLE' as const, activeSession: null } : t
+              )
+            );
             setReceiptData(receipt);
           }}
         />

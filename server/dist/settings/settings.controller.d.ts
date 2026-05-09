@@ -5,6 +5,8 @@ declare class UpdateSettingsDto {
     nightHourlyPrice?: number;
     dayStartTime?: string;
     nightStartTime?: string;
+    address?: string;
+    contactPhone?: string;
 }
 export declare class SettingsController {
     private settings;
@@ -16,6 +18,8 @@ export declare class SettingsController {
         nightHourlyPrice: number;
         dayStartTime: string;
         nightStartTime: string;
+        address: string;
+        contactPhone: string;
     }>;
     update(dto: UpdateSettingsDto): Promise<{
         id: number;
@@ -24,6 +28,8 @@ export declare class SettingsController {
         nightHourlyPrice: number;
         dayStartTime: string;
         nightStartTime: string;
+        address: string;
+        contactPhone: string;
     }>;
 }
 export {};

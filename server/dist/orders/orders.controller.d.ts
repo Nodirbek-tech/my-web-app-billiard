@@ -9,10 +9,10 @@ export declare class OrdersController {
             id: number;
             createdAt: Date;
             updatedAt: Date;
+            active: boolean;
             price: number;
             categoryId: number;
             stock: number | null;
-            active: boolean;
         };
     } & {
         id: number;
@@ -32,10 +32,10 @@ export declare class OrdersController {
             id: number;
             createdAt: Date;
             updatedAt: Date;
+            active: boolean;
             price: number;
             categoryId: number;
             stock: number | null;
-            active: boolean;
         };
     } & {
         id: number;

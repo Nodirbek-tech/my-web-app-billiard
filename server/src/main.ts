@@ -1,11 +1,29 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+const compression = require('compression');
+import type { Request, Response, NextFunction } from 'express';
+
+const logger = new Logger('HTTP');
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  app.use(compression());
+
+  // Slow-request logging (>300ms)
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      const ms = Date.now() - start;
+      if (ms > 300) {
+        logger.warn(`SLOW ${req.method} ${req.url} — ${ms}ms [${res.statusCode}]`);
+      }
+    });
+    next();
+  });
 
   app.enableCors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173',

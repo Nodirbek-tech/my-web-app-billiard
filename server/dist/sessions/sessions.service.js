@@ -8,12 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var SessionsService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SessionsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const ws_service_1 = require("../websocket/ws.service");
 const settings_service_1 = require("../settings/settings.service");
+const telegram_service_1 = require("../telegram/telegram.service");
 const client_1 = require("@prisma/client");
 function parseHour(hhmm) {
     return parseInt(hhmm.split(':')[0], 10);
@@ -47,11 +49,23 @@ function calcCostSplit(start, end, dayRate, nightRate, dayStartHour, nightStartH
     }
     return Math.round(cost * 100) / 100;
 }
-let SessionsService = class SessionsService {
-    constructor(prisma, ws, settingsService) {
+let SessionsService = SessionsService_1 = class SessionsService {
+    constructor(prisma, ws, settingsService, telegram) {
         this.prisma = prisma;
         this.ws = ws;
         this.settingsService = settingsService;
+        this.telegram = telegram;
+        this.logger = new common_1.Logger(SessionsService_1.name);
+        this.settingsCache = null;
+    }
+    async getSettings() {
+        const now = Date.now();
+        if (this.settingsCache && now < this.settingsCache.expiresAt) {
+            return this.settingsCache.data;
+        }
+        const data = await this.settingsService.get();
+        this.settingsCache = { data, expiresAt: now + 60_000 };
+        return data;
     }
     sessionIncludes() {
         return {
@@ -62,8 +76,18 @@ let SessionsService = class SessionsService {
             customer: true,
         };
     }
+    leanIncludes() {
+        return {
+            rounds: { orderBy: { roundNum: 'asc' } },
+            table: true,
+        };
+    }
     async startSession(tableId) {
-        const table = await this.prisma.table.findUnique({ where: { id: tableId } });
+        const t0 = Date.now();
+        const table = await this.prisma.table.findUnique({
+            where: { id: tableId },
+            select: { id: true, status: true },
+        });
         if (!table)
             throw new common_1.NotFoundException('Table not found');
         if (table.status !== client_1.TableStatus.AVAILABLE)
@@ -77,21 +101,29 @@ let SessionsService = class SessionsService {
                     status: client_1.SessionStatus.ACTIVE,
                     rounds: { create: { roundNum: 1, startTime: now } },
                 },
-                include: this.sessionIncludes(),
+                include: this.leanIncludes(),
             });
             await tx.table.update({ where: { id: tableId }, data: { status: client_1.TableStatus.OCCUPIED } });
             return s;
         });
         this.ws.emitTableUpdate({ id: tableId, status: client_1.TableStatus.OCCUPIED });
+        const ms = Date.now() - t0;
+        if (ms > 150)
+            this.logger.warn(`startSession(${tableId}) ${ms}ms`);
         return session;
     }
     async nextRound(sessionId) {
+        const t0 = Date.now();
         const [session, settings] = await Promise.all([
             this.prisma.session.findUnique({
                 where: { id: sessionId },
-                include: { rounds: true, table: true },
+                select: {
+                    id: true, tableId: true, status: true,
+                    rounds: { orderBy: { roundNum: 'asc' } },
+                    table: { select: { id: true } },
+                },
             }),
-            this.settingsService.get(),
+            this.getSettings(),
         ]);
         if (!session)
             throw new common_1.NotFoundException('Session not found');
@@ -114,18 +146,26 @@ let SessionsService = class SessionsService {
         ]);
         const updated = await this.prisma.session.findUnique({
             where: { id: sessionId },
-            include: this.sessionIncludes(),
+            include: this.leanIncludes(),
         });
         this.ws.emitSessionUpdate({ id: sessionId, tableId: session.tableId });
+        const ms = Date.now() - t0;
+        if (ms > 150)
+            this.logger.warn(`nextRound(${sessionId}) ${ms}ms`);
         return updated;
     }
     async stopSession(sessionId) {
+        const t0 = Date.now();
         const [session, settings] = await Promise.all([
             this.prisma.session.findUnique({
                 where: { id: sessionId },
-                include: { rounds: true, orders: true, table: true },
+                select: {
+                    id: true, tableId: true, status: true,
+                    rounds: { orderBy: { roundNum: 'asc' } },
+                    orders: { select: { id: true } },
+                },
             }),
-            this.settingsService.get(),
+            this.getSettings(),
         ]);
         if (!session)
             throw new common_1.NotFoundException('Session not found');
@@ -148,7 +188,7 @@ let SessionsService = class SessionsService {
             const s = await tx.session.update({
                 where: { id: sessionId },
                 data: { endTime: now, totalMinutes, playCost, status: client_1.SessionStatus.COMPLETED },
-                include: this.sessionIncludes(),
+                include: this.leanIncludes(),
             });
             await tx.table.update({
                 where: { id: session.tableId },
@@ -158,6 +198,9 @@ let SessionsService = class SessionsService {
         });
         this.ws.emitTableUpdate({ id: session.tableId, status: client_1.TableStatus.AVAILABLE });
         this.ws.emitSessionUpdate({ id: sessionId, tableId: session.tableId });
+        const ms = Date.now() - t0;
+        if (ms > 200)
+            this.logger.warn(`stopSession(${sessionId}) ${ms}ms`);
         return updated;
     }
     async attachCustomer(sessionId, customerId) {
@@ -180,6 +223,7 @@ let SessionsService = class SessionsService {
         return updated;
     }
     async stopAndPay(sessionId, dto) {
+        const t0 = Date.now();
         const [session, settings] = await Promise.all([
             this.prisma.session.findUnique({
                 where: { id: sessionId },
@@ -191,7 +235,7 @@ let SessionsService = class SessionsService {
                     customer: true,
                 },
             }),
-            this.settingsService.get(),
+            this.getSettings(),
         ]);
         if (!session)
             throw new common_1.NotFoundException('Session not found');
@@ -330,6 +374,18 @@ let SessionsService = class SessionsService {
         };
         this.ws.emitTableUpdate({ id: session.tableId, status: client_1.TableStatus.AVAILABLE });
         this.ws.emitSessionUpdate({ id: sessionId, tableId: session.tableId });
+        if (customer?.telegramId) {
+            this.telegram.notifyPayment(customer.id, {
+                tableName: session.table.name,
+                totalMinutes,
+                totalCost,
+                bonusEarned,
+                bonusBalance: newBonusBalance ?? 0,
+            }).catch(() => { });
+        }
+        const ms = Date.now() - t0;
+        if (ms > 300)
+            this.logger.warn(`stopAndPay(${sessionId}) ${ms}ms`);
         return receiptData;
     }
     async getSession(id) {
@@ -349,10 +405,11 @@ let SessionsService = class SessionsService {
     }
 };
 exports.SessionsService = SessionsService;
-exports.SessionsService = SessionsService = __decorate([
+exports.SessionsService = SessionsService = SessionsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         ws_service_1.WsService,
-        settings_service_1.SettingsService])
+        settings_service_1.SettingsService,
+        telegram_service_1.TelegramService])
 ], SessionsService);
 //# sourceMappingURL=sessions.service.js.map

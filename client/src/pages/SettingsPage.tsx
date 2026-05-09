@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Settings, Save, Percent, Sun, Moon } from 'lucide-react';
+import { Settings, Save, Percent, Sun, Moon, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,8 @@ function usePricingForm(settings: BusinessSettings | undefined) {
   const [nightPrice, setNightPrice] = useState('');
   const [dayStart, setDayStart] = useState('');
   const [nightStart, setNightStart] = useState('');
+  const [address, setAddress] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
 
   useEffect(() => {
     if (!settings) return;
@@ -24,6 +26,8 @@ function usePricingForm(settings: BusinessSettings | undefined) {
     setNightPrice(String(settings.nightHourlyPrice));
     setDayStart(settings.dayStartTime);
     setNightStart(settings.nightStartTime);
+    setAddress(settings.address ?? '');
+    setContactPhone(settings.contactPhone ?? '');
   }, [settings]);
 
   const cashbackNum = parseFloat(cashback) || 0;
@@ -43,6 +47,8 @@ function usePricingForm(settings: BusinessSettings | undefined) {
     nightHourlyPrice: nightPriceNum,
     dayStartTime: dayStart,
     nightStartTime: nightStart,
+    address: address || undefined,
+    contactPhone: contactPhone || undefined,
   };
 
   return {
@@ -51,6 +57,8 @@ function usePricingForm(settings: BusinessSettings | undefined) {
     nightPrice, setNightPrice,
     dayStart, setDayStart,
     nightStart, setNightStart,
+    address, setAddress,
+    contactPhone, setContactPhone,
     isValid, payload,
   };
 }
@@ -188,6 +196,35 @@ export default function SettingsPage() {
                   {Math.round(10000 * (form.payload.cashbackPercent ?? 0)) / 100} so'm bonus
                 </p>
               )}
+            </div>
+          </div>
+
+          {/* Contact info section */}
+          <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <p className="font-semibold text-sm">Aloqa ma'lumotlari (bot uchun)</p>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <MapPin className="w-3.5 h-3.5" />
+                Manzil
+              </Label>
+              <Input
+                value={form.address}
+                onChange={(e) => form.setAddress(e.target.value)}
+                placeholder="Shahar, ko'cha, uy"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Phone className="w-3.5 h-3.5" />
+                Telefon raqami
+              </Label>
+              <Input
+                value={form.contactPhone}
+                onChange={(e) => form.setContactPhone(e.target.value)}
+                placeholder="+998 90 123 45 67"
+              />
             </div>
           </div>
 

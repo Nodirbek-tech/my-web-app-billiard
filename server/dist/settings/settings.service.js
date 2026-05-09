@@ -43,6 +43,8 @@ let SettingsService = class SettingsService {
                 nightHourlyPrice: data.nightHourlyPrice ?? 50000,
                 dayStartTime: data.dayStartTime ?? '06:00',
                 nightStartTime: data.nightStartTime ?? '18:00',
+                address: data.address ?? "Manzil ko'rsatilmagan",
+                contactPhone: data.contactPhone ?? '+998 XX XXX XX XX',
             },
         });
     }

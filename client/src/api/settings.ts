@@ -7,6 +7,8 @@ export interface UpdateSettingsPayload {
   nightHourlyPrice?: number;
   dayStartTime?: string;
   nightStartTime?: string;
+  address?: string;
+  contactPhone?: string;
 }
 
 export const settingsApi = {

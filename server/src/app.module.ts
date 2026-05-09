@@ -13,6 +13,8 @@ import { WsModule } from './websocket/ws.module';
 import { CustomersModule } from './customers/customers.module';
 import { SettingsModule } from './settings/settings.module';
 import { TelegramModule } from './telegram/telegram.module';
+import { ReservationsModule } from './reservations/reservations.module';
+import { PromotionsModule } from './promotions/promotions.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { TelegramModule } from './telegram/telegram.module';
     CustomersModule,
     SettingsModule,
     TelegramModule,
+    ReservationsModule,
+    PromotionsModule,
   ],
 })
 export class AppModule {}

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, BarChart3, Users, Circle, UserCheck, Settings } from 'lucide-react';
+import { LayoutDashboard, Package, BarChart3, Users, Circle, UserCheck, Settings, CalendarDays, Megaphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
 
@@ -8,9 +8,11 @@ const navItems = [
   { to: '/products', label: 'Mahsulotlar', icon: Package },
   { to: '/reports', label: 'Hisobotlar', icon: BarChart3 },
   { to: '/customers', label: 'Mijozlar', icon: UserCheck },
+  { to: '/reservations', label: 'Bronlar', icon: CalendarDays },
 ];
 
 const adminItems = [
+  { to: '/promotions', label: 'Aksiyalar', icon: Megaphone },
   { to: '/users', label: 'Foydalanuvchilar', icon: Users },
   { to: '/settings', label: 'Sozlamalar', icon: Settings },
 ];

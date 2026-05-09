@@ -41,11 +41,29 @@ export default function TableCard({ table, settings }: TableCardProps) {
 
   const { mutate: startSession, isPending } = useMutation({
     mutationFn: () => sessionsApi.start(table.id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['tables'] });
+    onMutate: async () => {
+      // Cancel in-flight refetches so they don't overwrite the optimistic update
+      await qc.cancelQueries({ queryKey: ['tables'] });
+      const snapshot = qc.getQueryData<Table[]>(['tables']);
+      // Instantly flip the card to OCCUPIED
+      qc.setQueryData<Table[]>(['tables'], (old) =>
+        old?.map((t) => (t.id === table.id ? { ...t, status: 'OCCUPIED' as const } : t))
+      );
+      return { snapshot };
+    },
+    onSuccess: (newSession) => {
+      // Replace with actual session data from the API
+      qc.setQueryData<Table[]>(['tables'], (old) =>
+        old?.map((t) =>
+          t.id === table.id ? { ...t, status: 'OCCUPIED', activeSession: newSession as any } : t
+        )
+      );
       toast.success(`${table.name}da seans boshlandi`);
     },
-    onError: (err: any) => toast.error(err.response?.data?.message || "Seansni boshlab bo'lmadi"),
+    onError: (err: any, _, context: any) => {
+      if (context?.snapshot) qc.setQueryData(['tables'], context.snapshot);
+      toast.error(err.response?.data?.message || "Seansni boshlab bo'lmadi");
+    },
   });
 
   const isOccupied = table.status === 'OCCUPIED';

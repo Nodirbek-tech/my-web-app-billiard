@@ -39,6 +39,16 @@ class UpdateSettingsDto {
   @IsString()
   @Matches(/^\d{2}:\d{2}$/)
   nightStartTime?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  contactPhone?: string;
 }
 
 @ApiTags('settings')
