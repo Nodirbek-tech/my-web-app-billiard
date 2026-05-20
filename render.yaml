@@ -3,13 +3,8 @@ services:
     name: billiard-api
     runtime: node
     rootDir: server
-<<<<<<< HEAD
-    buildCommand: npm install && npx prisma generate --schema=./prisma/schema.prisma && npm run build
-    startCommand: npx prisma migrate deploy --schema=./prisma/schema.prisma && npm run start
-=======
-buildCommand: npm install && npx prisma generate --schema=./prisma/schema.prisma && npm run build
-startCommand: npx prisma migrate deploy --schema=./prisma/schema.prisma && npm run start
->>>>>>> dca06c1239a7913b00c2824b670a1ff59d5ccbf0
+    buildCommand: npm install && ./node_modules/.bin/prisma generate --schema=./prisma/schema.prisma && npm run build
+    startCommand: ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma && npm run start
     healthCheckPath: /api
     envVars:
       - key: NODE_ENV
