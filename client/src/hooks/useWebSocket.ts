@@ -1,14 +1,12 @@
 import { useEffect } from 'react';
-import { io } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
+import { createSocket } from '@/lib/socket';
 
 export function useWebSocket() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_WS_URL || 'http://localhost:3000', {
-      transports: ['websocket'],
-    });
+    const socket = createSocket();
 
     socket.on('table:update', () => {
       queryClient.invalidateQueries({ queryKey: ['tables'] });

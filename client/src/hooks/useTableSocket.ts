@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import { createSocket } from '@/lib/socket';
 import { tablesApi } from '@/api/tables';
 import type { Table } from '@/types';
-
-const WS_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function useTableSocket() {
   const qc = useQueryClient();
@@ -12,12 +11,7 @@ export function useTableSocket() {
   const pendingRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
-    const socket: Socket = io(WS_URL, {
-      transports: ['websocket'],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    });
+    const socket: Socket = createSocket();
 
     async function fetchAndUpdateTable(id: number) {
       if (pendingRef.current.has(id)) return;

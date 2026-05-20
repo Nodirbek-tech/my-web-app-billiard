@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ShoppingCart, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -68,6 +68,7 @@ export default function AddOrderDialog({ sessionId }: AddOrderDialogProps) {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Seansga mahsulot qo'shish</DialogTitle>
+          <DialogDescription className="sr-only">Seansga qo'shish uchun mahsulotlarni tanlang</DialogDescription>
         </DialogHeader>
 
         <div className="flex gap-2 overflow-x-auto pb-2">

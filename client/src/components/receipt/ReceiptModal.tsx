@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { X, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useUiStore } from '@/store/uiStore';
 import { BUSINESS } from '@/lib/config';
@@ -124,6 +124,7 @@ export default function ReceiptModal() {
         <DialogContent className="max-w-sm p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
           <DialogHeader className="p-4 pb-3 border-b border-border flex-shrink-0">
             <DialogTitle className="text-base">Chek {receiptData?.receiptNumber}</DialogTitle>
+            <DialogDescription className="sr-only">To'lov cheki tafsilotlari</DialogDescription>
           </DialogHeader>
 
           <ScrollArea className="flex-1">

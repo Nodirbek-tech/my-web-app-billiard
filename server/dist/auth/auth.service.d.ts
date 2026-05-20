@@ -4,6 +4,7 @@ import { LoginDto } from './dto/login.dto';
 export declare class AuthService {
     private users;
     private jwt;
+    private readonly logger;
     constructor(users: UsersService, jwt: JwtService);
     login(dto: LoginDto): Promise<{
         token: string;

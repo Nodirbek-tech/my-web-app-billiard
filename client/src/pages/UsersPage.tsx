@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usersApi } from '@/api/users';
 import { useAuthStore } from '@/store/authStore';
@@ -98,7 +98,10 @@ export default function UsersPage() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Foydalanuvchi qo'shish</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Foydalanuvchi qo'shish</DialogTitle>
+            <DialogDescription className="sr-only">Yangi foydalanuvchi ma'lumotlarini kiriting</DialogDescription>
+          </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>To'liq ism</Label>

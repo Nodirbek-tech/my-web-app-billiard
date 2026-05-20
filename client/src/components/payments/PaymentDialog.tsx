@@ -5,10 +5,9 @@ import { Banknote, CreditCard, Shuffle, Tag, Percent, FileText, CheckCircle2, Lo
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn, formatCurrency, formatTime, formatDuration, calcCostMs, parseTimeHour } from '@/lib/utils';
 import { sessionsApi, type StopAndPayPayload } from '@/api/sessions';
 import { useAuthStore } from '@/store/authStore';
@@ -126,17 +125,17 @@ export default function PaymentDialog({ session, table, settings, open, onCancel
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v && !isPending) onCancel(); }}>
-      <DialogContent className="max-w-lg max-h-[95vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-lg w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
         <DialogHeader className="p-5 pb-3 flex-shrink-0 border-b border-border">
           <DialogTitle className="text-lg">
             To'lov — {table.name} #{table.number}
           </DialogTitle>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             Seans · {formatDuration(totalMinutes)} umumiy o'yin vaqti
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-5 space-y-5">
 
             {/* Customer info */}
@@ -328,7 +327,7 @@ export default function PaymentDialog({ session, table, settings, open, onCancel
               <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="VIP chegirma, guruh bron…" className="h-9" />
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="p-5 pt-3 border-t border-border flex gap-3 flex-shrink-0 bg-card">
           <Button variant="outline" onClick={onCancel} disabled={isPending} className="flex-none">

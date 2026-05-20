@@ -9,7 +9,7 @@ import TableCard from '@/components/tables/TableCard';
 import AddTableDialog from '@/components/tables/AddTableDialog';
 import SessionPanel from '@/components/sessions/SessionPanel';
 import ReceiptModal from '@/components/receipt/ReceiptModal';
-import type { Table, BusinessSettings } from '@/types';
+import type { Table } from '@/types';
 
 function TablesSkeleton() {
   return (
@@ -79,9 +79,17 @@ export default function DashboardPage() {
       </div>
 
       {selectedTable && (
-        <div className="w-80 flex-shrink-0 bg-card border border-border rounded-xl overflow-hidden animate-fade-in">
-          <SessionPanel table={selectedTable} settings={settings} />
-        </div>
+        <>
+          {/* Backdrop — visible only below lg, closes panel on tap */}
+          <div
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            onClick={() => setSelectedTable(null)}
+          />
+          {/* Panel — slide-over on tablet, side column on desktop */}
+          <div className="fixed top-0 right-0 bottom-0 z-50 w-80 max-w-[90vw] flex-shrink-0 bg-card border-l border-border overflow-hidden animate-fade-in lg:relative lg:top-auto lg:right-auto lg:bottom-auto lg:z-auto lg:max-w-none lg:border lg:rounded-xl">
+            <SessionPanel table={selectedTable} settings={settings} />
+          </div>
+        </>
       )}
 
       <ReceiptModal />

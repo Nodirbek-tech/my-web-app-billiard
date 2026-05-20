@@ -26,7 +26,18 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // server-to-server / same-origin
+      const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+      if (origin === clientUrl) return callback(null, true);
+      if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return callback(null, true);
+      // Allow RFC-1918 private LAN ranges (192.168.x.x, 172.16-31.x.x, 10.x.x.x)
+      if (/^https?:\/\/(192\.168|172\.(1[6-9]|2\d|3[01])|10)\.\d+\.\d+(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      logger.warn(`CORS blocked request from: ${origin}`);
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
     credentials: true,
   });
 

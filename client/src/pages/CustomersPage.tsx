@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { customersApi, type CreateCustomerPayload } from '@/api/customers';
@@ -39,6 +39,7 @@ function CustomerProfileDialog({ customerId, onClose }: { customerId: number; on
             <UserCheck className="w-4 h-4" />
             Mijoz profili
           </DialogTitle>
+          <DialogDescription className="sr-only">Mijoz profili va tashrif tarixi</DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
@@ -151,6 +152,7 @@ function AddCustomerDialog({ onClose }: { onClose: () => void }) {
             <Plus className="w-4 h-4" />
             Yangi mijoz
           </DialogTitle>
+          <DialogDescription className="sr-only">Yangi mijoz ma'lumotlarini kiriting</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">

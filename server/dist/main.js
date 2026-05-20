@@ -21,7 +21,20 @@ async function bootstrap() {
         next();
     });
     app.enableCors({
-        origin: process.env.CLIENT_URL || 'http://localhost:5173',
+        origin: (origin, callback) => {
+            if (!origin)
+                return callback(null, true);
+            const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+            if (origin === clientUrl)
+                return callback(null, true);
+            if (/^https?:\/\/localhost(:\d+)?$/.test(origin))
+                return callback(null, true);
+            if (/^https?:\/\/(192\.168|172\.(1[6-9]|2\d|3[01])|10)\.\d+\.\d+(:\d+)?$/.test(origin)) {
+                return callback(null, true);
+            }
+            logger.warn(`CORS blocked request from: ${origin}`);
+            callback(new Error(`CORS blocked: ${origin}`));
+        },
         credentials: true,
     });
     app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }));

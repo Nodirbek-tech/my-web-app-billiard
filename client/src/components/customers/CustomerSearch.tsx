@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Search, UserPlus, X, CreditCard, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatCurrency } from '@/lib/utils';
 import { customersApi } from '@/api/customers';
 import { sessionsApi } from '@/api/sessions';
@@ -46,6 +46,7 @@ export default function CustomerSearch({ sessionId, attachedCustomer, open, onCl
             <UserPlus className="w-4 h-4" />
             Mijoz biriktirish
           </DialogTitle>
+          <DialogDescription className="sr-only">Mijozni ism, telefon yoki karta raqami bo'yicha qidiring</DialogDescription>
         </DialogHeader>
 
         <div className="p-4 flex-shrink-0">

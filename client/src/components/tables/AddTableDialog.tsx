@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { tablesApi } from '@/api/tables';
 
 export default function AddTableDialog() {
@@ -41,6 +41,7 @@ export default function AddTableDialog() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Yangi stol qo'shish</DialogTitle>
+          <DialogDescription className="sr-only">Yangi stol ma'lumotlarini kiriting</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-4">
