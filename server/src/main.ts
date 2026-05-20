@@ -57,8 +57,9 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, SwaggerModule.createDocument(app, config));
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
-  console.log(`Server running on http://localhost:${port}`);
+  // '0.0.0.0' is required on Render — binding to localhost makes the health check fail
+  await app.listen(port, '0.0.0.0');
+  console.log(`Server running on port ${port}`);
   console.log(`Swagger docs at http://localhost:${port}/api`);
 }
 

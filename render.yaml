@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: billiard-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install && npm run prisma:generate && npm run build
+    startCommand: npm run prisma:deploy && npm run start
+    healthCheckPath: /api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false        # set in Render dashboard — paste your PostgreSQL connection string
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_URL
+        sync: false        # set in Render dashboard — your frontend URL e.g. https://billiard.onrender.com
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false        # optional — leave empty to disable Telegram bot
+
+databases:
+  - name: billiard-db
+    databaseName: billiard_club
+    user: billiard
+    plan: free
