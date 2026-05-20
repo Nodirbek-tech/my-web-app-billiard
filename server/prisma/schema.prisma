@@ -1,0 +1,270 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../server/node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ────────────────────────────────────────────────────────────────────
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+// ─── Tables ───────────────────────────────────────────────────────────────────
+
+model Table {
+  id          Int         @id @default(autoincrement())
+  name        String
+  number      Int         @unique
+  hourlyPrice Float
+  nightPrice  Float?
+  status      TableStatus @default(AVAILABLE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  sessions    Session[]
+
+  @@index([status])
+  @@index([number])
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+}
+
+// ─── Sessions ─────────────────────────────────────────────────────────────────
+
+model Session {
+  id           Int            @id @default(autoincrement())
+  tableId      Int
+  table        Table          @relation(fields: [tableId], references: [id])
+  customerId   Int?
+  customer     Customer?      @relation(fields: [customerId], references: [id])
+  startTime    DateTime
+  endTime      DateTime?
+  totalMinutes Int?
+  playCost     Float?
+  status       SessionStatus  @default(ACTIVE)
+  rounds       SessionRound[]
+  orders       SessionOrder[]
+  payment      Payment?
+  visit        CustomerVisit?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([tableId, status])
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerId])
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model SessionRound {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  session   Session  @relation(fields: [sessionId], references: [id])
+  roundNum  Int
+  startTime DateTime
+  endTime   DateTime?
+  minutes   Int?
+  cost      Float?
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+// ─── Products & Orders ────────────────────────────────────────────────────────
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String
+  active    Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id         Int            @id @default(autoincrement())
+  name       String
+  price      Float
+  categoryId Int
+  category   Category       @relation(fields: [categoryId], references: [id])
+  stock      Int?
+  active     Boolean        @default(true)
+  orders     SessionOrder[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([categoryId])
+  @@index([active])
+}
+
+model SessionOrder {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  session   Session  @relation(fields: [sessionId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Float
+  total     Float
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  sessionId     Int           @unique
+  session       Session       @relation(fields: [sessionId], references: [id])
+  customerId    Int?
+  playCost      Float
+  orderCost     Float
+  discount      Float         @default(0)
+  serviceFee    Float         @default(0)
+  bonusRedeemed Float         @default(0)
+  bonusEarned   Float         @default(0)
+  totalCost     Float
+  method        PaymentMethod
+  cashAmount    Float?
+  cardAmount    Float?
+  notes         String?
+  cashierName   String?
+  paidAt        DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+
+  @@index([paidAt])
+  @@index([customerId])
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  MIXED
+}
+
+// ─── Customers & Loyalty ──────────────────────────────────────────────────────
+
+model Customer {
+  id               Int             @id @default(autoincrement())
+  name             String
+  phone            String          @unique
+  cardNumber       String          @unique
+  bonusBalance     Float           @default(0)
+  telegramId       String?         @unique
+  telegramUsername String?
+  qrCodeValue      String?         @unique
+  sessions         Session[]
+  visits           CustomerVisit[]
+  reservations     Reservation[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([phone])
+  @@index([cardNumber])
+  @@index([telegramId])
+}
+
+model CustomerVisit {
+  id            Int      @id @default(autoincrement())
+  customerId    Int
+  customer      Customer @relation(fields: [customerId], references: [id])
+  sessionId     Int      @unique
+  session       Session  @relation(fields: [sessionId], references: [id])
+  playCost      Float    @default(0)
+  orderCost     Float    @default(0)
+  totalCost     Float    @default(0)
+  bonusEarned   Float    @default(0)
+  bonusRedeemed Float    @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([customerId])
+}
+
+// ─── Business Settings (singleton: id = 1) ────────────────────────────────────
+
+model BusinessSettings {
+  id               Int    @id @default(1)
+  cashbackPercent  Float  @default(5)
+  dayHourlyPrice   Float  @default(40000)
+  nightHourlyPrice Float  @default(50000)
+  dayStartTime     String @default("06:00")
+  nightStartTime   String @default("18:00")
+  address          String @default("Manzil ko'rsatilmagan")
+  contactPhone     String @default("+998 XX XXX XX XX")
+}
+
+// ─── Reservations ─────────────────────────────────────────────────────────────
+
+model Reservation {
+  id          Int               @id @default(autoincrement())
+  customerId  Int?
+  customer    Customer?         @relation(fields: [customerId], references: [id])
+  name        String
+  phone       String
+  date        DateTime
+  peopleCount Int               @default(1)
+  note        String?
+  status      ReservationStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([status])
+  @@index([date])
+  @@index([customerId])
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+// ─── Promotions ───────────────────────────────────────────────────────────────
+
+model Promotion {
+  id        Int                @id @default(autoincrement())
+  title     String
+  message   String
+  active    Boolean            @default(true)
+  sendLogs  PromotionSendLog[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model PromotionSendLog {
+  id          Int       @id @default(autoincrement())
+  promotionId Int
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  customerId  Int
+  sentAt      DateTime  @default(now())
+
+  @@unique([promotionId, customerId])
+  @@index([promotionId])
+  @@index([customerId])
+}
