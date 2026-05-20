@@ -1,18 +1,15 @@
 import {
   Controller, Get, Post, Patch, Delete,
-  Param, Body, Query, ParseIntPipe, UseGuards,
+  Param, Body, Query, ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiQuery } from '@nestjs/swagger';
 import { ReservationsService } from './reservations.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationStatusDto } from './dto/update-reservation-status.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ReservationStatus } from '@prisma/client';
 
 @ApiTags('reservations')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('reservations')
 export class ReservationsController {
   constructor(

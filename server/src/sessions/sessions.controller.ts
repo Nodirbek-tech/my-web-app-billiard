@@ -1,8 +1,7 @@
-import { Controller, Post, Patch, Get, Param, ParseIntPipe, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { Controller, Post, Patch, Get, Param, ParseIntPipe, Body } from '@nestjs/common';
+import { ApiTags, ApiProperty } from '@nestjs/swagger';
 import { SessionsService } from './sessions.service';
 import { StopAndPayDto } from './dto/stop-and-pay.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { IsOptional, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -17,8 +16,6 @@ class AttachCustomerDto {
 }
 
 @ApiTags('sessions')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('sessions')
 export class SessionsController {
   constructor(private sessions: SessionsService) {}

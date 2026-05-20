@@ -1,5 +1,4 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+// Auth removed — stub that satisfies existing imports without enforcing any auth.
 import type { AuthUser } from '../types';
 
 interface AuthState {
@@ -10,18 +9,21 @@ interface AuthState {
   isAdmin: () => boolean;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      user: null,
-      token: null,
-      setAuth: (token, user) => set({ token, user }),
-      logout: () => set({ token: null, user: null }),
-      isAdmin: () => get().user?.role === 'ADMIN',
-    }),
-    {
-      name: 'auth-store',
-      partialize: (s) => ({ token: s.token, user: s.user }),
-    },
-  ),
-);
+const state: AuthState = {
+  user: null,
+  token: null,
+  setAuth: () => {},
+  logout: () => {},
+  isAdmin: () => true,   // always admin — all nav items visible
+};
+
+// Minimal zustand-compatible hook so `useAuthStore((s) => s.x)` and
+// `useAuthStore()` both work, and `useAuthStore.getState()` works too.
+function useAuthStore(): AuthState;
+function useAuthStore<T>(selector: (s: AuthState) => T): T;
+function useAuthStore<T>(selector?: (s: AuthState) => T): T | AuthState {
+  return selector ? selector(state) : state;
+}
+useAuthStore.getState = () => state;
+
+export { useAuthStore };

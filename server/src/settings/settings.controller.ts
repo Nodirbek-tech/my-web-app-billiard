@@ -1,7 +1,6 @@
-import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { Controller, Get, Patch, Body } from '@nestjs/common';
+import { ApiTags, ApiProperty } from '@nestjs/swagger';
 import { SettingsService } from './settings.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { IsNumber, Min, Max, IsOptional, IsString, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -52,8 +51,6 @@ class UpdateSettingsDto {
 }
 
 @ApiTags('settings')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('settings')
 export class SettingsController {
   constructor(private settings: SettingsService) {}

@@ -1,11 +1,8 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiTags, ApiQuery } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('reports')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('reports')
 export class ReportsController {
   constructor(private reports: ReportsService) {}

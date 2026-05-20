@@ -1,17 +1,14 @@
 import {
   Controller, Get, Post, Patch, Delete,
-  Param, Body, ParseIntPipe, UseGuards, Query,
+  Param, Body, ParseIntPipe, Query,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { PromotionsService } from './promotions.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('promotions')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('promotions')
 export class PromotionsController {
   constructor(
