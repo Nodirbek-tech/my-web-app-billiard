@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { lazy, Suspense } from 'react';
+import { useAuthStore } from './store/authStore';
 import Layout from './components/layout/Layout';
+import LoginPage from './pages/LoginPage';
 import { Skeleton } from './components/ui/skeleton';
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
@@ -26,12 +28,26 @@ function PageLoader() {
   );
 }
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const token = useAuthStore((s) => s.token);
+  if (!token) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Toaster theme="dark" position="top-right" richColors />
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>} />
           <Route path="products" element={<Suspense fallback={<PageLoader />}><ProductsPage /></Suspense>} />
           <Route path="reports" element={<Suspense fallback={<PageLoader />}><ReportsPage /></Suspense>} />
