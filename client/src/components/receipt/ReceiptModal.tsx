@@ -129,7 +129,7 @@ export default function ReceiptModal() {
 
           <ScrollArea className="flex-1">
             <div className="p-4">
-              <pre className="font-mono text-[11px] leading-[1.45] bg-secondary/30 border border-border/50 rounded-lg p-3 whitespace-pre text-foreground overflow-x-auto">
+              <pre className="font-mono text-[11px] leading-[1.45] rounded-lg p-3 whitespace-pre overflow-x-auto" style={{ background: '#ffffff', color: '#000000', border: '1px solid #d1d5db' }}>
                 {receiptText}
               </pre>
             </div>
