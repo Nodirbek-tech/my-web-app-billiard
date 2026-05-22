@@ -20,18 +20,24 @@ export function formatDuration(minutes: number): string {
 }
 
 export function formatTime(date: string | Date): string {
-  const d = new Date(date);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return new Date(date).toLocaleTimeString('uz-UZ', {
+    timeZone: 'Asia/Tashkent',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 }
 
 export function formatDateTime(date: string | Date): string {
-  const d = new Date(date);
-  const dd = String(d.getDate()).padStart(2, '0');
-  const MM = String(d.getMonth() + 1).padStart(2, '0');
-  const yyyy = d.getFullYear();
-  const HH = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${dd}.${MM}.${yyyy} ${HH}:${mm}`;
+  return new Date(date).toLocaleString('uz-UZ', {
+    timeZone: 'Asia/Tashkent',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 }
 
 export function padTwo(n: number): string {
