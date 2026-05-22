@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Billiard Club — Premium Billiard Markazi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   RESET & ROOT
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:      #0a0a0a;
+  --black-2:    #0f0f0f;
+  --green-deep: #0d2818;
+  --green-mid:  #0f3520;
+  --green-dark: #071a0f;
+  --gold:       #c9a84c;
+  --gold-light: #e4c97a;
+  --gold-dim:   #8a6e2f;
+  --gold-glow:  rgba(201,168,76,0.18);
+  --green-glow: rgba(13,200,80,0.08);
+  --white:      #f5f0e8;
+  --white-dim:  rgba(245,240,232,0.7);
+  --white-muted:rgba(245,240,232,0.4);
+  --glass-bg:   rgba(13,40,24,0.55);
+  --glass-border:rgba(201,168,76,0.2);
+  --radius:     12px;
+  --transition: 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--black);
+  color: var(--white);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+h1,h2,h3,h4 { font-family: 'Playfair Display', serif; line-height: 1.2; }
+
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { cursor: pointer; font-family: 'Inter', sans-serif; border: none; }
+input, select, textarea { font-family: 'Inter', sans-serif; }
+
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+/* ============================================================
+   NOISE OVERLAY (texture)
+============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.6;
+}
+
+/* ============================================================
+   GOLDEN DIVIDER
+============================================================ */
+.gold-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 auto 48px;
+  width: fit-content;
+}
+.gold-divider::before, .gold-divider::after {
+  content: '';
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.gold-divider::after { background: linear-gradient(90deg, var(--gold), transparent); }
+.gold-divider-icon {
+  width: 10px; height: 10px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.section-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--white) 0%, var(--gold-light) 60%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-sub {
+  color: var(--white-dim);
+  font-size: 1.05rem;
+  font-weight: 300;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   HEADER / NAV
+============================================================ */
+#header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 0 5%;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background var(--transition), backdrop-filter var(--transition), border-bottom var(--transition);
+}
+#header.scrolled {
+  background: rgba(10,10,10,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(201,168,76,0.12);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+.logo-text {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--white);
+}
+.logo-text span { color: var(--gold); }
+
+nav { display: flex; align-items: center; gap: 36px; }
+nav a {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: var(--white-dim);
+  transition: color var(--transition);
+  position: relative;
+}
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 1px;
+  background: var(--gold);
+  transition: width var(--transition);
+}
+nav a:hover { color: var(--gold); }
+nav a:hover::after { width: 100%; }
+
+.nav-cta {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: var(--black) !important;
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 1px;
+  transition: all var(--transition) !important;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+}
+.nav-cta::after { display: none !important; }
+.nav-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 30px rgba(201,168,76,0.45) !important;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  padding: 4px;
+}
+.hamburger span {
+  display: block;
+  width: 24px; height: 2px;
+  background: var(--white);
+  border-radius: 2px;
+  transition: var(--transition);
+}
+
+/* ============================================================
+   HERO
+============================================================ */
+#hero {
+  position: relative;
+  height: 100vh;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Felt table background */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(13,53,32,0.95) 0%, rgba(7,26,15,0.98) 50%, var(--black) 100%);
+  z-index: 0;
+}
+
+/* Felt texture */
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+  z-index: 1;
+}
+
+/* Table border glow */
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  top: 10%; left: 5%; right: 5%; bottom: 10%;
+  border: 2px solid rgba(201,168,76,0.15);
+  border-radius: 40px;
+  box-shadow:
+    inset 0 0 80px rgba(13,200,80,0.05),
+    0 0 60px rgba(13,200,80,0.04);
+  z-index: 2;
+}
+
+/* Ambient blobs */
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: blobFloat 8s ease-in-out infinite;
+  z-index: 1;
+}
+.hero-blob-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(13,80,40,0.4) 0%, transparent 70%);
+  top: -100px; left: -100px;
+  animation-delay: 0s;
+}
+.hero-blob-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+  bottom: -80px; right: -80px;
+  animation-delay: -4s;
+}
+.hero-blob-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(13,53,32,0.5) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -2s;
+}
+
+@keyframes blobFloat {
+  0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-30px) scale(1.06); }
+}
+
+/* Pool balls canvas */
+#ballsCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 0 24px;
+  animation: heroFadeIn 1.2s cubic-bezier(0.16,1,0.3,1) forwards;
+  opacity: 0;
+}
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(201,168,76,0.12);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 40px;
+  padding: 6px 20px;
+  margin-bottom: 28px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+}
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero-logo-icon {
+  width: 90px; height: 90px;
+  margin: 0 auto 24px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05));
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px rgba(201,168,76,0.2), inset 0 0 30px rgba(201,168,76,0.05);
+  animation: logoSpin 20s linear infinite;
+}
+@keyframes logoSpin {
+  from { box-shadow: 0 0 40px rgba(201,168,76,0.2), inset 0 0 30px rgba(201,168,76,0.05); }
+  50%  { box-shadow: 0 0 60px rgba(201,168,76,0.35), inset 0 0 40px rgba(201,168,76,0.1); }
+  to   { box-shadow: 0 0 40px rgba(201,168,76,0.2), inset 0 0 30px rgba(201,168,76,0.05); }
+}
+
+.hero-title {
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #ffffff 0%, var(--gold-light) 50%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  line-height: 1.05;
+}
+
+.hero-subtitle {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: 6px;
+  color: var(--gold);
+  margin-bottom: 20px;
+  opacity: 0.85;
+}
+
+.hero-desc {
+  font-size: 1.1rem;
+  color: var(--white-dim);
+  font-weight: 300;
+  margin-bottom: 48px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), #a07828);
+  color: var(--black);
+  padding: 16px 40px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all var(--transition);
+  box-shadow: 0 8px 32px rgba(201,168,76,0.35);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(201,168,76,0.5); }
+.btn-primary:hover::before { opacity: 1; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--white);
+  padding: 15px 36px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 1px;
+  border: 1px solid rgba(245,240,232,0.3);
+  transition: all var(--transition);
+}
+.btn-outline:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,168,76,0.06);
+}
+
+/* Scroll indicator */
+.hero-scroll {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: scrollBounce 2s ease-in-out infinite;
+  cursor: pointer;
+}
+.hero-scroll span {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--white-muted);
+  text-transform: uppercase;
+  font-family: 'Cinzel', serif;
+}
+.scroll-line {
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+}
+@keyframes scrollBounce {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ============================================================
+   SECTIONS COMMON
+============================================================ */
+section { position: relative; }
+
+.section-pad {
+  padding: 120px 5%;
+}
+
+.text-center { text-align: center; }
+
+/* Felt texture overlay for sections */
+.felt-section {
+  background:
+    linear-gradient(180deg, var(--black) 0%, var(--green-deep) 30%, var(--green-mid) 60%, var(--green-deep) 80%, var(--black) 100%);
+}
+.felt-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.008) 3px, rgba(255,255,255,0.008) 6px),
+    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.006) 3px, rgba(255,255,255,0.006) 6px);
+  pointer-events: none;
+}
+
+/* ============================================================
+   HAQIMDA
+============================================================ */
+#haqimda { background: var(--black-2); }
+
+.haqimda-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  margin-top: 60px;
+}
+
+.haqimda-img-wrap {
+  position: relative;
+}
+.haqimda-img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, var(--green-deep) 0%, var(--green-dark) 100%);
+  border: 1px solid rgba(201,168,76,0.2);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.08);
+}
+/* SVG billiard table illustration */
+.haqimda-img svg { width: 100%; height: 100%; }
+
+.haqimda-img-badge {
+  position: absolute;
+  bottom: -20px; right: -20px;
+  width: 100px; height: 100px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(201,168,76,0.4);
+}
+.haqimda-img-badge .num {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--black);
+  line-height: 1;
+}
+.haqimda-img-badge .lbl {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--black);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.haqimda-text { }
+.haqimda-text p {
+  color: var(--white-dim);
+  font-size: 1.05rem;
+  font-weight: 300;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 48px;
+}
+.stat-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition);
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(201,168,76,0.12); }
+.stat-card:hover::before { opacity: 1; }
+.stat-card:hover { box-shadow: 0 0 30px rgba(13,200,80,0.1), 0 12px 40px rgba(0,0,0,0.4); }
+
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white-muted);
+  font-family: 'Cinzel', serif;
+}
+
+/* ============================================================
+   XIZMATLAR
+============================================================ */
+#xizmatlar { background: var(--black); }
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 60px;
+}
+
+.service-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 36px 28px 32px;
+  text-align: center;
+  backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition);
+  cursor: default;
+}
+.service-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top center, rgba(13,200,80,0.06) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.service-card:hover { transform: translateY(-8px); }
+.service-card:hover::after { opacity: 1; }
+.service-card:hover {
+  border-color: rgba(201,168,76,0.4);
+  box-shadow: 0 0 40px rgba(13,200,80,0.1), 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.vip-badge {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: var(--black);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-family: 'Cinzel', serif;
+}
+
+.service-icon {
+  width: 72px; height: 72px;
+  margin: 0 auto 24px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.service-card:hover .service-icon {
+  background: linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1));
+  box-shadow: 0 0 30px rgba(201,168,76,0.2);
+}
+
+.service-icon svg { width: 32px; height: 32px; }
+
+.service-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--white);
+}
+.service-desc {
+  font-size: 0.9rem;
+  color: var(--white-muted);
+  line-height: 1.7;
+  margin-bottom: 24px;
+  font-weight: 300;
+}
+.service-price {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.price-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.price-unit {
+  font-size: 10px;
+  color: var(--white-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'Cinzel', serif;
+}
+
+/* ============================================================
+   JADVAL & NARXLAR
+============================================================ */
+#jadval { background: var(--black-2); }
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 60px;
+}
+
+/* Table availability */
+.table-availability {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 32px;
+  backdrop-filter: blur(16px);
+}
+.table-availability h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  margin-bottom: 24px;
+  color: var(--gold);
+}
+.tables-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.table-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: all var(--transition);
+}
+.table-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--white-dim);
+}
+.table-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 20px;
+  transition: all 0.25s;
+  font-family: 'Cinzel', serif;
+}
+.table-status.bosh {
+  background: rgba(13,180,80,0.12);
+  color: #4ade80;
+  border: 1px solid rgba(13,180,80,0.25);
+}
+.table-status.band {
+  background: rgba(239,68,68,0.1);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.2);
+}
+.table-status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.bosh .table-status-dot { background: #4ade80; }
+.band .table-status-dot { background: #f87171; }
+
+/* Price table */
+.price-table-wrap {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 32px;
+  backdrop-filter: blur(16px);
+}
+.price-table-wrap h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  margin-bottom: 24px;
+  color: var(--gold);
+}
+.price-table { width: 100%; border-collapse: collapse; }
+.price-table th {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white-muted);
+  font-family: 'Cinzel', serif;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.price-table td {
+  padding: 14px 12px;
+  font-size: 14px;
+  color: var(--white-dim);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.price-table tr:last-child td { border-bottom: none; }
+.price-table td:last-child { color: var(--gold); font-weight: 600; font-family: 'Playfair Display', serif; }
+.price-table tr:hover td { background: rgba(255,255,255,0.025); }
+
+/* VIP Packages */
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+.package-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  text-align: center;
+  backdrop-filter: blur(16px);
+  position: relative;
+  transition: all var(--transition);
+}
+.package-card.featured {
+  border-color: rgba(201,168,76,0.5);
+  background: linear-gradient(135deg, rgba(13,40,24,0.8), rgba(201,168,76,0.05));
+  box-shadow: 0 0 40px rgba(201,168,76,0.12);
+}
+.package-card:hover { transform: translateY(-6px); }
+.package-popular {
+  position: absolute;
+  top: -14px; left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: var(--black);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 5px 16px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-family: 'Cinzel', serif;
+  white-space: nowrap;
+}
+.package-name {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+.package-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.package-period {
+  font-size: 12px;
+  color: var(--white-muted);
+  margin-bottom: 28px;
+}
+.package-features { list-style: none; margin-bottom: 32px; }
+.package-features li {
+  font-size: 13px;
+  color: var(--white-dim);
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.package-features li::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.package-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: all var(--transition);
+  font-family: 'Cinzel', serif;
+}
+.package-btn-outline {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,0.4);
+}
+.package-btn-outline:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); }
+.package-btn-filled {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: var(--black);
+  border: none;
+}
+.package-btn-filled:hover { box-shadow: 0 8px 24px rgba(201,168,76,0.4); transform: translateY(-1px); }
+
+/* ============================================================
+   GALEREYA
+============================================================ */
+#galereya { background: var(--black); }
+
+.gallery-grid {
+  columns: 4;
+  column-gap: 16px;
+  margin-top: 60px;
+}
+.gallery-item {
+  break-inside: avoid;
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+.gallery-item:nth-child(3n+1) { height: 260px; }
+.gallery-item:nth-child(3n+2) { height: 200px; }
+.gallery-item:nth-child(3n)   { height: 300px; }
+
+.gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+/* SVG placeholder gallery images */
+.gallery-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.gallery-item:hover .gallery-placeholder { transform: scale(1.08); }
+
+.gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity var(--transition);
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+}
+.gallery-item:hover .gallery-overlay { opacity: 1; }
+.gallery-overlay-text {
+  font-size: 13px;
+  color: var(--white);
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+/* ============================================================
+   BRON (BOOKING FORM)
+============================================================ */
+#bron { background: var(--black-2); }
+
+.bron-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 60px;
+  align-items: start;
+  margin-top: 60px;
+}
+
+.bron-info { }
+.bron-info h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  color: var(--white);
+}
+.bron-info p {
+  color: var(--white-dim);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 40px;
+  font-weight: 300;
+}
+.bron-features { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+.bron-features li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  color: var(--white-dim);
+}
+.bron-feat-icon {
+  width: 36px; height: 36px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bron-form {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 40px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { margin-bottom: 20px; }
+.form-group.full { grid-column: 1/-1; }
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+  font-family: 'Cinzel', serif;
+}
+.req { color: #f87171; margin-left: 2px; }
+
+input[type="text"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+select {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 13px 16px;
+  font-size: 14px;
+  color: var(--white);
+  outline: none;
+  transition: all var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+input:focus, select:focus {
+  border-color: rgba(201,168,76,0.5);
+  background: rgba(201,168,76,0.04);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+}
+input::placeholder { color: var(--white-muted); }
+select option { background: #1a2e1f; color: var(--white); }
+
+.form-error {
+  display: none;
+  font-size: 11px;
+  color: #f87171;
+  margin-top: 5px;
+  letter-spacing: 0.5px;
+}
+.form-group.invalid input,
+.form-group.invalid select { border-color: rgba(248,113,113,0.5); }
+.form-group.invalid .form-error { display: block; }
+
+.form-submit {
+  width: 100%;
+  background: linear-gradient(135deg, var(--gold), #a07828);
+  color: var(--black);
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all var(--transition);
+  box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+  font-family: 'Cinzel', serif;
+  margin-top: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.form-submit:hover { box-shadow: 0 14px 40px rgba(201,168,76,0.45); transform: translateY(-2px); }
+.form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.form-success {
+  display: none;
+  text-align: center;
+  padding: 40px 20px;
+}
+.form-success.show { display: block; }
+.success-icon {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.05));
+  border: 1px solid rgba(74,222,128,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.form-success h3 { font-size: 1.4rem; color: var(--white); margin-bottom: 8px; }
+.form-success p { color: var(--white-muted); font-size: 14px; }
+
+/* ============================================================
+   KONTAKT
+============================================================ */
+#kontakt { background: var(--black); }
+
+.kontakt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 60px;
+  margin-top: 60px;
+}
+
+.kontakt-info { display: flex; flex-direction: column; gap: 28px; }
+.kontakt-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.kontakt-icon {
+  width: 48px; height: 48px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+.kontakt-item:hover .kontakt-icon {
+  background: rgba(201,168,76,0.18);
+  box-shadow: 0 0 20px rgba(201,168,76,0.15);
+}
+.kontakt-item-text h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.kontakt-item-text p {
+  color: var(--white-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.kontakt-map {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 16/10;
+  backdrop-filter: blur(16px);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-placeholder {
+  text-align: center;
+}
+.map-placeholder svg { margin: 0 auto 16px; opacity: 0.4; }
+.map-placeholder p { color: var(--white-muted); font-size: 14px; }
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer {
+  background: var(--black);
+  border-top: 1px solid rgba(201,168,76,0.1);
+  padding: 60px 5% 32px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+.footer-brand p {
+  color: var(--white-muted);
+  font-size: 13px;
+  line-height: 1.8;
+  margin-top: 16px;
+  max-width: 260px;
+  font-weight: 300;
+}
+.footer-col h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-col ul li a {
+  font-size: 13px;
+  color: var(--white-muted);
+  transition: color var(--transition);
+}
+.footer-col ul li a:hover { color: var(--gold); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.footer-bottom p { font-size: 12px; color: var(--white-muted); }
+.footer-bottom span { color: var(--gold); }
+
+/* ============================================================
+   WHATSAPP FLOAT BUTTON
+============================================================ */
+.whatsapp-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 900;
+  width: 58px; height: 58px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(37,211,102,0.4);
+  transition: all var(--transition);
+  animation: whatsappPop 0.6s cubic-bezier(0.16,1,0.3,1) 2s both;
+}
+@keyframes whatsappPop {
+  from { transform: scale(0) rotate(-180deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.whatsapp-btn:hover { transform: scale(1.12); box-shadow: 0 12px 40px rgba(37,211,102,0.55); }
+.whatsapp-tooltip {
+  position: absolute;
+  right: 68px;
+  background: rgba(10,10,10,0.9);
+  color: var(--white);
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.whatsapp-btn:hover .whatsapp-tooltip { opacity: 1; }
+
+/* ============================================================
+   MOBILE NAV OVERLAY
+============================================================ */
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,10,0.97);
+  backdrop-filter: blur(20px);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+.mobile-nav.open { opacity: 1; pointer-events: all; }
+.mobile-nav a {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--white);
+  transition: color var(--transition);
+}
+.mobile-nav a:hover { color: var(--gold); }
+.mobile-close {
+  position: absolute;
+  top: 24px; right: 5%;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ============================================================
+   ANIMATIONS (IntersectionObserver)
+============================================================ */
+.fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+.fade-up-delay-1 { transition-delay: 0.1s; }
+.fade-up-delay-2 { transition-delay: 0.2s; }
+.fade-up-delay-3 { transition-delay: 0.3s; }
+.fade-up-delay-4 { transition-delay: 0.4s; }
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 1200px) {
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .gallery-grid { columns: 3; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+
+@media (max-width: 900px) {
+  .haqimda-grid { grid-template-columns: 1fr; gap: 40px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .packages-grid { grid-template-columns: 1fr 1fr; }
+  .bron-grid { grid-template-columns: 1fr; }
+  .kontakt-grid { grid-template-columns: 1fr; }
+  nav { display: none; }
+  .hamburger { display: flex; }
+  .tables-list { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .section-pad { padding: 80px 5%; }
+  .services-grid { grid-template-columns: 1fr; }
+  .packages-grid { grid-template-columns: 1fr; }
+  .gallery-grid { columns: 2; }
+  .stats-row { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .bron-form { padding: 28px 20px; }
+}
+
+@media (max-width: 380px) {
+  .gallery-grid { columns: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+   HEADER
+============================================================ -->
+<header id="header">
+  <a href="#hero" class="logo" aria-label="Royal Billiard Club">
+    <div class="logo-icon" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="#0a0a0a" stroke-width="1.5"/>
+        <circle cx="12" cy="12" r="4" fill="#0a0a0a"/>
+        <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="logo-text">ROYAL <span>BILLIARD</span></div>
+  </a>
+
+  <nav aria-label="Asosiy navigatsiya">
+    <a href="#haqimda">Haqimda</a>
+    <a href="#xizmatlar">Xizmatlar</a>
+    <a href="#jadval">Narxlar</a>
+    <a href="#galereya">Galereya</a>
+    <a href="#kontakt">Kontakt</a>
+    <a href="#bron" class="nav-cta">Bron qilish</a>
+  </nav>
+
+  <button class="hamburger" id="hamburger" aria-label="Menyuni ochish" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobil navigatsiya">
+  <button class="mobile-close" id="mobileClose" aria-label="Menyuni yopish">✕</button>
+  <a href="#haqimda">Haqimda</a>
+  <a href="#xizmatlar">Xizmatlar</a>
+  <a href="#jadval">Narxlar</a>
+  <a href="#galereya">Galereya</a>
+  <a href="#bron">Bron qilish</a>
+  <a href="#kontakt">Kontakt</a>
+</div>
+
+<!-- ============================================================
+   HERO
+============================================================ -->
+<section id="hero" aria-label="Bosh sahifa">
+  <div class="hero-bg"></div>
+  <div class="hero-blob hero-blob-1"></div>
+  <div class="hero-blob hero-blob-2"></div>
+  <div class="hero-blob hero-blob-3"></div>
+  <canvas id="ballsCanvas" aria-hidden="true"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Premium Billiard Club · Toshkent
+    </div>
+
+    <div class="hero-logo-icon" aria-hidden="true">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="20" stroke="url(#lg1)" stroke-width="1.5"/>
+        <circle cx="24" cy="24" r="8" fill="url(#lg2)"/>
+        <circle cx="24" cy="14" r="3" fill="url(#lg2)"/>
+        <circle cx="31" cy="29" r="3" fill="url(#lg2)"/>
+        <circle cx="17" cy="29" r="3" fill="url(#lg2)"/>
+        <defs>
+          <linearGradient id="lg1" x1="4" y1="4" x2="44" y2="44">
+            <stop offset="0%" stop-color="#c9a84c"/>
+            <stop offset="100%" stop-color="#8a6e2f"/>
+          </linearGradient>
+          <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#e4c97a"/>
+            <stop offset="100%" stop-color="#c9a84c"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <h1 class="hero-title">Royal Billiard</h1>
+    <p class="hero-subtitle">PREMIUM CLUB · TOSHKENT</p>
+    <p class="hero-desc">Hashamatli muhit, professional jadvallar va unutilmas o'yin tajribasi sizni kutmoqda.</p>
+
+    <div class="hero-btns">
+      <a href="#bron" class="btn-primary">Bron qilish</a>
+      <a href="#xizmatlar" class="btn-outline">Xizmatlarni ko'rish</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll" onclick="document.getElementById('haqimda').scrollIntoView({behavior:'smooth'})" role="button" tabindex="0" aria-label="Pastga o'ting">
+    <span>Pastga</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+   HAQIMDA
+============================================================ -->
+<section id="haqimda" class="section-pad" aria-labelledby="haqimda-title">
+  <div class="text-center fade-up">
+    <span class="section-label">Bizning Klub</span>
+    <h2 class="section-title" id="haqimda-title">Royal Billiard Haqida</h2>
+    <div class="gold-divider"><div class="gold-divider-icon"></div></div>
+    <p class="section-sub">2010-yildan buyon Toshkentning billiard sanʼati markazida — sizga eng yaxshi o'yin tajribasini taqdim etamiz.</p>
+  </div>
+
+  <div class="haqimda-grid">
+    <div class="haqimda-img-wrap fade-up">
+      <div class="haqimda-img">
+        <!-- SVG Billiard Table Illustration -->
+        <svg viewBox="0 0 500 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="500" height="380" fill="#0d2818"/>
+          <!-- Table felt -->
+          <rect x="40" y="40" width="420" height="300" rx="20" fill="#0f3520"/>
+          <rect x="40" y="40" width="420" height="300" rx="20" stroke="#c9a84c" stroke-width="2" opacity="0.4"/>
+          <!-- Cushions -->
+          <rect x="50" y="50" width="400" height="280" rx="15" fill="none" stroke="#0a5e30" stroke-width="8"/>
+          <!-- Pockets -->
+          <circle cx="58" cy="58" r="12" fill="#0a0a0a"/>
+          <circle cx="442" cy="58" r="12" fill="#0a0a0a"/>
+          <circle cx="58" cy="322" r="12" fill="#0a0a0a"/>
+          <circle cx="442" cy="322" r="12" fill="#0a0a0a"/>
+          <circle cx="250" cy="50" r="10" fill="#0a0a0a"/>
+          <circle cx="250" cy="330" r="10" fill="#0a0a0a"/>
+          <!-- Center line -->
+          <line x1="250" y1="60" x2="250" y2="320" stroke="#1a5c30" stroke-width="1" opacity="0.5"/>
+          <circle cx="250" cy="190" r="35" stroke="#1a5c30" stroke-width="1" opacity="0.5" fill="none"/>
+          <!-- Balls -->
+          <circle cx="180" cy="190" r="14" fill="#f5f0e8"/>
+          <circle cx="310" cy="160" r="14" fill="#c9a84c"/>
+          <circle cx="310" cy="160" r="8" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="330" cy="200" r="14" fill="#dc2626"/>
+          <circle cx="290" cy="200" r="14" fill="#1d4ed8"/>
+          <circle cx="310" cy="220" r="14" fill="#7c3aed"/>
+          <circle cx="350" cy="190" r="14" fill="#059669"/>
+          <!-- Cue -->
+          <line x1="130" y1="190" x2="165" y2="190" stroke="#c9a84c" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+          <line x1="50" y1="190" x2="130" y2="190" stroke="#8a6e2f" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          <!-- Glow -->
+          <circle cx="180" cy="190" r="20" fill="url(#ballGlow)" opacity="0.3"/>
+          <defs>
+            <radialGradient id="ballGlow">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="haqimda-img-badge">
+        <span class="num">15+</span>
+        <span class="lbl">Yillik<br>Tajriba</span>
+      </div>
+    </div>
+
+    <div class="haqimda-text fade-up fade-up-delay-2">
+      <span class="section-label">Tariximiz</span>
+      <h2 style="font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; margin-bottom:20px; color:var(--white);">
+        Toshkentning eng nufuzli billiard markazi
+      </h2>
+      <p>Royal Billiard Club — 2010-yildan buyon Toshkent shahrida premium billiard xizmatlarini taqdim etib kelayotgan yetakchi markaz. Biz nafaqat o'yin joyi, balki billiard sanʼatini sevuvchilar uchun haqiqiy uy yaratdik.</p>
+      <p>Zamonaviy texnologiyalar bilan jihozlangan professional jadvallarimiz, malakali instruktorlarimiz va noyob VIP muhitimiz sizga unutilmas tajriba bag'ishlaydi. Har bir mehmonimiz o'zini haqiqiy champion kabi his etishi — bizning asosiy maqsadimiz.</p>
+
+      <div class="stats-row">
+        <div class="stat-card fade-up fade-up-delay-1">
+          <div class="stat-num" data-target="24">0</div>
+          <div class="stat-label">Jadvallar</div>
+        </div>
+        <div class="stat-card fade-up fade-up-delay-2">
+          <div class="stat-num" data-target="1200">0</div>
+          <div class="stat-label">A'zolar</div>
+        </div>
+        <div class="stat-card fade-up fade-up-delay-3">
+          <div class="stat-num" data-target="15">0</div>
+          <div class="stat-label">Yil tajriba</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+   XIZMATLAR
+============================================================ -->
+<section id="xizmatlar" class="section-pad felt-section" aria-labelledby="xizmatlar-title">
+  <div class="text-center fade-up">
+    <span class="section-label">Nima taklif etamiz</span>
+    <h2 class="section-title" id="xizmatlar-title">Bizning Xizmatlar</h2>
+    <div class="gold-divider"><div class="gold-divider-icon"></div></div>
+    <p class="section-sub">Professional billiard turlari va maxsus VIP xonalarimiz bilan tanishing.</p>
+  </div>
+
+  <div class="services-grid">
+    <!-- Pool -->
+    <div class="service-card fade-up fade-up-delay-1">
+      <div class="service-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="14" stroke="#c9a84c" stroke-width="1.5"/>
+          <circle cx="16" cy="10" r="3.5" fill="#c9a84c"/>
+          <circle cx="11" cy="19" r="3.5" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="21" cy="19" r="3.5" fill="#c9a84c" opacity="0.5"/>
+        </svg>
+      </div>
+      <h3 class="service-name">Pool</h3>
+      <p class="service-desc">Klassik amerikan pool o'yini. 8-ball va 9-ball formatlarida professional jadvallar va to'liq jihozlar bilan.</p>
+      <div class="service-price">
+        <span class="price-amount">25 000</span>
+        <span class="price-unit">so'm / soat</span>
+      </div>
+    </div>
+
+    <!-- Snooker -->
+    <div class="service-card fade-up fade-up-delay-2">
+      <div class="service-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect x="2" y="8" width="28" height="16" rx="4" stroke="#c9a84c" stroke-width="1.5"/>
+          <circle cx="8" cy="16" r="2.5" fill="#c9a84c"/>
+          <circle cx="16" cy="12" r="2.5" fill="#c9a84c" opacity="0.8"/>
+          <circle cx="16" cy="20" r="2.5" fill="#c9a84c" opacity="0.6"/>
+          <circle cx="24" cy="16" r="2.5" fill="#c9a84c" opacity="0.4"/>
+        </svg>
+      </div>
+      <h3 class="service-name">Snooker</h3>
+      <p class="service-desc">Ingliz snookeri uchun maxsus katta o'lchamdagi jadvallar. Professionallar uchun mukammal sharoit.</p>
+      <div class="service-price">
+        <span class="price-amount">35 000</span>
+        <span class="price-unit">so'm / soat</span>
+      </div>
+    </div>
+
+    <!-- Karambol -->
+    <div class="service-card fade-up fade-up-delay-3">
+      <div class="service-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="13" stroke="#c9a84c" stroke-width="1.5"/>
+          <circle cx="12" cy="14" r="3" fill="#c9a84c"/>
+          <circle cx="20" cy="14" r="3" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="16" cy="21" r="3" fill="#c9a84c" opacity="0.4"/>
+          <path d="M12 14 Q16 18 20 14" stroke="#c9a84c" stroke-width="1" opacity="0.5" fill="none"/>
+        </svg>
+      </div>
+      <h3 class="service-name">Karambol</h3>
+      <p class="service-desc">Frantsuz karambol o'yini — uchta shar bilan texnik mahorat va aniqlikni talab qiluvchi premium format.</p>
+      <div class="service-price">
+        <span class="price-amount">30 000</span>
+        <span class="price-unit">so'm / soat</span>
+      </div>
+    </div>
+
+    <!-- VIP Xona -->
+    <div class="service-card fade-up fade-up-delay-4">
+      <div class="vip-badge">VIP</div>
+      <div class="service-icon" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <path d="M16 3L19.5 11H28L21.5 16L24 24L16 19L8 24L10.5 16L4 11H12.5L16 3Z" stroke="#c9a84c" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3 class="service-name">VIP Xona</h3>
+      <p class="service-desc">Shaxsiy VIP xonangizda eng zamonaviy jadval, ichimliklar, maxfiylik va premium xizmat sizni kutmoqda.</p>
+      <div class="service-price">
+        <span class="price-amount">150 000</span>
+        <span class="price-unit">so'm / soat</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+   JADVAL & NARXLAR
+============================================================ -->
+<section id="jadval" class="section-pad" aria-labelledby="jadval-title">
+  <div class="text-center fade-up">
+    <span class="section-label">Imkoniyatlar</span>
+    <h2 class="section-title" id="jadval-title">Jadval & Narxlar</h2>
+    <div class="gold-divider"><div class="gold-divider-icon"></div></div>
+    <p class="section-sub">Jadval holati va narxlar bilan tanishing. Bron qilish bir daqiqada!</p>
+  </div>
+
+  <div class="pricing-grid fade-up">
+    <!-- Table availability -->
+    <div class="table-availability">
+      <h3>Jadvallar holati</h3>
+      <div class="tables-list" id="tablesList">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+    <!-- Price table -->
+    <div class="price-table-wrap">
+      <h3>Soatlik narxlar</h3>
+      <table class="price-table" aria-label="Soatlik narxlar jadvali">
+        <thead>
+          <tr>
+            <th>Xizmat turi</th>
+            <th>Kun (9:00–18:00)</th>
+            <th>Kecha (18:00–02:00)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Pool (8-ball)</td><td>25 000 so'm</td><td>30 000 so'm</td></tr>
+          <tr><td>Pool (9-ball)</td><td>25 000 so'm</td><td>30 000 so'm</td></tr>
+          <tr><td>Snooker</td><td>35 000 so'm</td><td>42 000 so'm</td></tr>
+          <tr><td>Karambol</td><td>30 000 so'm</td><td>36 000 so'm</td></tr>
+          <tr><td>VIP Xona</td><td>150 000 so'm</td><td>180 000 so'm</td></tr>
+          <tr><td>Trener (1 soat)</td><td>60 000 so'm</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Packages -->
+  <div class="text-center fade-up" style="margin-top:80px;">
+    <span class="section-label">Obunalar</span>
+    <h3 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--white);margin-bottom:8px;">A'zolik Rejalari</h3>
+  </div>
+
+  <div class="packages-grid">
+    <!-- Starter -->
+    <div class="package-card fade-up fade-up-delay-1">
+      <div class="package-name">Starter</div>
+      <div class="package-price">299 000</div>
+      <div class="package-period">so'm / oyiga</div>
+      <ul class="package-features">
+        <li>10 soat pool o'yini</li>
+        <li>Bepul kue ijarasi</li>
+        <li>Onlayn bron</li>
+        <li>5% chegirma</li>
+      </ul>
+      <button class="package-btn package-btn-outline" onclick="document.getElementById('bron').scrollIntoView({behavior:'smooth'})">Tanlash</button>
+    </div>
+
+    <!-- Premium -->
+    <div class="package-card featured fade-up fade-up-delay-2">
+      <div class="package-popular">Eng Mashhur</div>
+      <div class="package-name">Premium</div>
+      <div class="package-price">699 000</div>
+      <div class="package-period">so'm / oyiga</div>
+      <ul class="package-features">
+        <li>30 soat (barcha turlar)</li>
+        <li>2 soat bepul trener</li>
+        <li>VIP xonaga kirish</li>
+        <li>15% chegirma</li>
+        <li>Ustuvor bron</li>
+      </ul>
+      <button class="package-btn package-btn-filled" onclick="document.getElementById('bron').scrollIntoView({behavior:'smooth'})">Tanlash</button>
+    </div>
+
+    <!-- VIP -->
+    <div class="package-card fade-up fade-up-delay-3">
+      <div class="package-name">VIP Elite</div>
+      <div class="package-price">1 499 000</div>
+      <div class="package-period">so'm / oyiga</div>
+      <ul class="package-features">
+        <li>Cheksiz o'yin vaqti</li>
+        <li>Shaxsiy VIP xona</li>
+        <li>8 soat trener</li>
+        <li>25% chegirma</li>
+        <li>24/7 bron imkoniyati</li>
+        <li>Mehmonlar uchun imtiyoz</li>
+      </ul>
+      <button class="package-btn package-btn-outline" onclick="document.getElementById('bron').scrollIntoView({behavior:'smooth'})">Tanlash</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+   GALEREYA
+============================================================ -->
+<section id="galereya" class="section-pad felt-section" aria-labelledby="galereya-title">
+  <div class="text-center fade-up">
+    <span class="section-label">Klub muhiti</span>
+    <h2 class="section-title" id="galereya-title">Galereya</h2>
+    <div class="gold-divider"><div class="gold-divider-icon"></div></div>
+    <p class="section-sub">Klubimizning hashamatli muhiti bilan tanishing.</p>
+  </div>
+
+  <div class="gallery-grid" id="galleryGrid" aria-label="Klub galereya rasmlari">
+    <!-- Generated by JS -->
+  </div>
+</section>
+
+<!-- ============================================================
+   BRON
+============================================================ -->
+<section id="bron" class="section-pad" aria-labelledby="bron-title">
+  <div class="text-center fade-up">
+    <span class="section-label">Joyingizni band qiling</span>
+    <h2 class="section-title" id="bron-title">Onlayn Bron</h2>
+    <div class="gold-divider"><div class="gold-divider-icon"></div></div>
+  </div>
+
+  <div class="bron-grid">
+    <div class="bron-info fade-up">
+      <h3>Bugun o'yningizni rejalashtiring</h3>
+      <p>Onlayn bron orqali o'zingizga qulay vaqtda jadval band qiling. Tasdiqlash SMS va WhatsApp orqali yuboriladi.</p>
+      <ul class="bron-features">
+        <li>
+          <div class="bron-feat-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+            </svg>
+          </div>
+          <span>Tezkor va oson ro'yxatdan o'tish</span>
+        </li>
+        <li>
+          <div class="bron-feat-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <span>Xohlagancha vaqtni tanlang</span>
+        </li>
+        <li>
+          <div class="bron-feat-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .9h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+          </div>
+          <span>SMS va WhatsApp tasdiqlanishi</span>
+        </li>
+        <li>
+          <div class="bron-feat-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <span>Bekor qilish — 24 soat oldin bepul</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="bron-form fade-up fade-up-delay-2">
+      <form id="bronForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ism">Ism Familiya <span class="req">*</span></label>
+            <input type="text" id="ism" name="ism" placeholder="Abdullayev Jasur" autocomplete="name" required>
+            <span class="form-error">Ism familiyangizni kiriting</span>
+          </div>
+          <div class="form-group">
+            <label for="telefon">Telefon <span class="req">*</span></label>
+            <input type="tel" id="telefon" name="telefon" placeholder="+998 90 123 45 67" autocomplete="tel" required>
+            <span class="form-error">To'g'ri telefon raqam kiriting</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sana">Sana <span class="req">*</span></label>
+            <input type="date" id="sana" name="sana" required>
+            <span class="form-error">Sanani tanlang</span>
+          </div>
+          <div class="form-group">
+            <label for="vaqt">Vaqt <span class="req">*</span></label>
+            <input type="time" id="vaqt" name="vaqt" required>
+            <span class="form-error">Vaqtni tanlang</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="stol">Stol turi <span class="req">*</span></label>
+            <select id="stol" name="stol" required>
+              <option value="">Tanlang...</option>
+              <option value="pool">Pool (8-ball)</option>
+              <option value="pool9">Pool (9-ball)</option>
+              <option value="snooker">Snooker</option>
+              <option value="karambol">Karambol</option>
+              <option value="vip">VIP Xona</option>
+            </select>
+            <span class="form-error">Stol turini tanlang</span>
+          </div>
+          <div class="form-group">
+            <label for="davomiylik">Davomiylik <span class="req">*</span></label>
+            <select id="davomiylik" name="davomiylik" required>
+              <option value="">Tanlang...</option>
+              <option value="1">1 soat</option>
+              <option value="2">2 soat</option>
+              <option value="3">3 soat</option>
+              <option value="4">4 soat</option>
+              <option value="more">4+ soat</option>
+            </select>
+            <span class="form-error">Davomiylikni tanlang</span>
+          </div>
+        </div>
+        <button type="submit" class="form-submit" id="formSubmit">
+          Bron qilish
+        </button>
+      </form>
+
+      <div class="form-success" id="formSuccess" role="alert" aria-live="polite">
+        <div class="success-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h3>Bron muvaffaqiyatli!</h3>
+        <p>Tez orada siz bilan bog'lanamiz va bronni tasdiqlaymiz.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+   KONTAKT
+============================================================ -->
+<section id="kontakt" class="section-pad felt-section" aria-labelledby="kontakt-title">
+  <div class="text-center fade-up">
+    <span class="section-label">Biz bilan bog'laning</span>
+    <h2 class="section-title" id="kontakt-title">Kontakt</h2>
+    <div class="gold-divider"><div class="gold-divider-icon"></div></div>
+  </div>
+
+  <div class="kontakt-grid">
+    <div class="kontakt-info fade-up">
+      <div class="kontakt-item">
+        <div class="kontakt-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+        </div>
+        <div class="kontakt-item-text">
+          <h4>Manzil</h4>
+          <p>Toshkent shahri, Chilonzor tumani,<br>Bunyodkor ko'chasi, 45-uy</p>
+        </div>
+      </div>
+      <div class="kontakt-item">
+        <div class="kontakt-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .9h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+          </svg>
+        </div>
+        <div class="kontakt-item-text">
+          <h4>Telefon</h4>
+          <p><a href="tel:+998901234567" style="color:var(--white-dim)">+998 90 123 45 67</a><br><a href="tel:+998712345678" style="color:var(--white-dim)">+998 71 234 56 78</a></p>
+        </div>
+      </div>
+      <div class="kontakt-item">
+        <div class="kontakt-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="kontakt-item-text">
+          <h4>Ish vaqti</h4>
+          <p>Dushanba – Juma: 09:00 – 02:00<br>Shanba – Yakshanba: 08:00 – 03:00</p>
+        </div>
+      </div>
+      <div class="kontakt-item">
+        <div class="kontakt-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="kontakt-item-text">
+          <h4>Email</h4>
+          <p><a href="mailto:info@royalbilliard.uz" style="color:var(--white-dim)">info@royalbilliard.uz</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="kontakt-map fade-up fade-up-delay-2" aria-label="Xarita joylashuvi">
+      <div class="map-placeholder">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+        <p style="color:var(--gold);font-size:16px;font-weight:600;margin-bottom:6px;">Royal Billiard Club</p>
+        <p>Bunyodkor ko'chasi, 45, Toshkent</p>
+        <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer"
+           style="display:inline-block;margin-top:16px;padding:10px 24px;background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:var(--black);border-radius:4px;font-weight:600;font-size:13px;letter-spacing:1px;transition:all var(--transition);">
+          Xaritada ko'rish
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+   FOOTER
+============================================================ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#0a0a0a" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="4" fill="#0a0a0a"/>
+            <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="logo-text">ROYAL <span>BILLIARD</span></div>
+      </div>
+      <p>Toshkentning eng nufuzli billiard markazi. 2010-yildan buyon premium xizmat va professional muhit.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Xizmatlar</h4>
+      <ul>
+        <li><a href="#xizmatlar">Pool (8-ball)</a></li>
+        <li><a href="#xizmatlar">Pool (9-ball)</a></li>
+        <li><a href="#xizmatlar">Snooker</a></li>
+        <li><a href="#xizmatlar">Karambol</a></li>
+        <li><a href="#xizmatlar">VIP Xona</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Klub</h4>
+      <ul>
+        <li><a href="#haqimda">Haqimda</a></li>
+        <li><a href="#jadval">Narxlar</a></li>
+        <li><a href="#galereya">Galereya</a></li>
+        <li><a href="#bron">Bron qilish</a></li>
+        <li><a href="#kontakt">Kontakt</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Ijtimoiy tarmoqlar</h4>
+      <ul>
+        <li><a href="#" rel="noopener">Instagram</a></li>
+        <li><a href="#" rel="noopener">Telegram</a></li>
+        <li><a href="#" rel="noopener">Facebook</a></li>
+        <li><a href="#" rel="noopener">YouTube</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 <span>Royal Billiard Club</span>. Barcha huquqlar himoyalangan.</p>
+    <p>Ishlab chiqildi <span>♦</span> Premium Dizayn</p>
+  </div>
+</footer>
+
+<!-- WhatsApp Float -->
+<a href="https://wa.me/998901234567" class="whatsapp-btn" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp orqali bog'laning">
+  <div class="whatsapp-tooltip">WhatsApp orqali yozish</div>
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="#ffffff">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+  </svg>
+</a>
+
+<!-- ============================================================
+   JAVASCRIPT
+============================================================ -->
+<script>
+/* ---- Sticky Header ---- */
+const header = document.getElementById('header');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+/* ---- Mobile Nav ---- */
+const hamburger = document.getElementById('hamburger');
+const mobileNav = document.getElementById('mobileNav');
+const mobileClose = document.getElementById('mobileClose');
+
+function openNav() {
+  mobileNav.classList.add('open');
+  hamburger.setAttribute('aria-expanded', 'true');
+  document.body.style.overflow = 'hidden';
+}
+function closeNav() {
+  mobileNav.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
+hamburger.addEventListener('click', openNav);
+mobileClose.addEventListener('click', closeNav);
+mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
+
+/* ---- Pool Balls Canvas Animation ---- */
+const canvas = document.getElementById('ballsCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas, { passive: true });
+
+const BALL_COLORS = [
+  '#f5f0e8', // cue
+  '#f59e0b', // 1
+  '#1d4ed8', // 2
+  '#dc2626', // 3
+  '#7c3aed', // 4
+  '#f97316', // 5
+  '#16a34a', // 6
+  '#991b1b', // 7
+  '#1a1a1a', // 8
+  '#f59e0b', // 9
+  '#1d4ed8', // 10
+];
+
+const balls = Array.from({ length: 9 }, (_, i) => {
+  const r = 10 + Math.random() * 6;
+  return {
+    x: Math.random() * (window.innerWidth - 200) + 100,
+    y: Math.random() * (window.innerHeight * 0.6) + window.innerHeight * 0.2,
+    r,
+    vx: (Math.random() - 0.5) * 1.4,
+    vy: (Math.random() - 0.5) * 1.4,
+    color: BALL_COLORS[i % BALL_COLORS.length],
+    num: i + 1,
+    opacity: 0.55 + Math.random() * 0.3,
+  };
+});
+
+function drawBall(b) {
+  ctx.save();
+  ctx.globalAlpha = b.opacity;
+  // Shadow/glow
+  ctx.shadowColor = b.color;
+  ctx.shadowBlur = 18;
+  // Ball gradient
+  const grad = ctx.createRadialGradient(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.1, b.x, b.y, b.r);
+  grad.addColorStop(0, lighten(b.color, 40));
+  grad.addColorStop(1, darken(b.color, 30));
+  ctx.beginPath();
+  ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  // White stripe for striped balls
+  if (b.num > 8) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fillRect(b.x - b.r, b.y - b.r * 0.4, b.r * 2, b.r * 0.8);
+    ctx.restore();
+  }
+  // Number circle
+  ctx.beginPath();
+  ctx.arc(b.x, b.y, b.r * 0.42, 0, Math.PI * 2);
+  ctx.fillStyle = b.num === 1 ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.9)';
+  ctx.fill();
+  // Number text
+  ctx.fillStyle = b.num === 1 ? '#f5f0e8' : '#111';
+  ctx.font = `bold ${b.r * 0.52}px Inter, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowBlur = 0;
+  ctx.fillText(b.num, b.x, b.y + 0.5);
+  ctx.restore();
+}
+
+function lighten(hex, amount) {
+  const num = parseInt(hex.replace('#',''), 16);
+  const r = Math.min(255, (num >> 16) + amount);
+  const g = Math.min(255, ((num >> 8) & 0xFF) + amount);
+  const b = Math.min(255, (num & 0xFF) + amount);
+  return `rgb(${r},${g},${b})`;
+}
+function darken(hex, amount) {
+  const num = parseInt(hex.replace('#',''), 16);
+  const r = Math.max(0, (num >> 16) - amount);
+  const g = Math.max(0, ((num >> 8) & 0xFF) - amount);
+  const b = Math.max(0, (num & 0xFF) - amount);
+  return `rgb(${r},${g},${b})`;
+}
+
+let animFrame;
+function animateBalls() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  balls.forEach(b => {
+    b.x += b.vx;
+    b.y += b.vy;
+    // Boundary bounce
+    if (b.x - b.r < 0) { b.x = b.r; b.vx *= -1; }
+    if (b.x + b.r > canvas.width) { b.x = canvas.width - b.r; b.vx *= -1; }
+    if (b.y - b.r < 0) { b.y = b.r; b.vy *= -1; }
+    if (b.y + b.r > canvas.height) { b.y = canvas.height - b.r; b.vy *= -1; }
+    drawBall(b);
+  });
+  animFrame = requestAnimationFrame(animateBalls);
+}
+
+// Only animate when hero is visible
+const heroEl = document.getElementById('hero');
+const heroObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    animFrame = requestAnimationFrame(animateBalls);
+  } else {
+    cancelAnimationFrame(animFrame);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}, { threshold: 0.1 });
+heroObserver.observe(heroEl);
+
+/* ---- IntersectionObserver for fade-up ---- */
+const fadeEls = document.querySelectorAll('.fade-up');
+const fadeObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      fadeObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+fadeEls.forEach(el => fadeObs.observe(el));
+
+/* ---- Counter Animation ---- */
+function animateCounter(el) {
+  const target = parseInt(el.dataset.target, 10);
+  const duration = 2000;
+  const start = performance.now();
+  function step(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(ease * target);
+    el.textContent = current.toLocaleString('uz');
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString('uz');
+  }
+  requestAnimationFrame(step);
+}
+
+const counters = document.querySelectorAll('.stat-num[data-target]');
+const counterObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animateCounter(e.target);
+      counterObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+counters.forEach(c => counterObs.observe(c));
+
+/* ---- Table Availability Toggle ---- */
+const tableData = [
+  { id: 1, name: 'Pool #1', status: 'bosh' },
+  { id: 2, name: 'Pool #2', status: 'band' },
+  { id: 3, name: 'Pool #3', status: 'bosh' },
+  { id: 4, name: 'Pool #4', status: 'bosh' },
+  { id: 5, name: 'Snooker #1', status: 'band' },
+  { id: 6, name: 'Snooker #2', status: 'bosh' },
+  { id: 7, name: 'Karambol #1', status: 'bosh' },
+  { id: 8, name: 'VIP Xona', status: 'band' },
+];
+
+const tablesList = document.getElementById('tablesList');
+tableData.forEach(t => {
+  const item = document.createElement('div');
+  item.className = 'table-item';
+  item.innerHTML = `
+    <span class="table-item-name">${t.name}</span>
+    <button class="table-status ${t.status}" data-id="${t.id}"
+            aria-label="${t.name}: ${t.status === 'bosh' ? 'Bo\'sh' : 'Band'}"
+            aria-pressed="${t.status === 'band'}">
+      <span class="table-status-dot"></span>
+      ${t.status === 'bosh' ? "Bo'sh" : 'Band'}
+    </button>`;
+  tablesList.appendChild(item);
+});
+
+tablesList.addEventListener('click', e => {
+  const btn = e.target.closest('.table-status');
+  if (!btn) return;
+  const id = parseInt(btn.dataset.id, 10);
+  const t = tableData.find(x => x.id === id);
+  t.status = t.status === 'bosh' ? 'band' : 'bosh';
+  btn.className = `table-status ${t.status}`;
+  btn.setAttribute('aria-label', `${t.name}: ${t.status === 'bosh' ? "Bo'sh" : 'Band'}`);
+  btn.setAttribute('aria-pressed', t.status === 'band');
+  btn.innerHTML = `<span class="table-status-dot"></span>${t.status === 'bosh' ? "Bo'sh" : 'Band'}`;
+});
+
+/* ---- Gallery ---- */
+const galleryData = [
+  { label: 'Pool zali', colors: ['#0d2818','#071a0f'], h: 260 },
+  { label: 'VIP xona', colors: ['#1a1008','#2a1a05'], h: 200 },
+  { label: 'Snooker jadvali', colors: ['#0a1e12','#0d2818'], h: 300 },
+  { label: 'Karambol', colors: ['#0f2010','#061509'], h: 240 },
+  { label: 'Lounge zonasi', colors: ['#1a1508','#251f0a'], h: 180 },
+  { label: 'Trening xonasi', colors: ['#0b1e12','#0d2818'], h: 320 },
+  { label: 'Bar stoli', colors: ['#1a1008','#0d0a04'], h: 220 },
+  { label: 'Chempionat zali', colors: ['#071a0f','#0d2818'], h: 260 },
+];
+
+const galleryIcons = [
+  // billiard balls
+  `<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;opacity:0.5">
+    <circle cx="40" cy="60" r="28" fill="#c9a84c" opacity="0.7"/>
+    <circle cx="40" cy="60" r="12" fill="#fff" opacity="0.6"/>
+    <circle cx="80" cy="50" r="22" fill="#dc2626" opacity="0.7"/>
+    <circle cx="80" cy="50" r="9" fill="#fff" opacity="0.6"/>
+    <circle cx="75" cy="80" r="20" fill="#1d4ed8" opacity="0.7"/>
+  </svg>`,
+  // star / vip
+  `<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:70px;height:70px;opacity:0.5">
+    <path d="M40 8L48 30H72L53 44L60 66L40 52L20 66L27 44L8 30H32L40 8Z" fill="#c9a84c"/>
+  </svg>`,
+  // table top view
+  `<svg viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:90px;height:60px;opacity:0.45">
+    <rect x="5" y="5" width="110" height="70" rx="10" stroke="#c9a84c" stroke-width="2"/>
+    <rect x="14" y="14" width="92" height="52" rx="6" fill="none" stroke="#0a5e30" stroke-width="6"/>
+    <circle cx="14" cy="14" r="6" fill="#0a0a0a"/>
+    <circle cx="106" cy="14" r="6" fill="#0a0a0a"/>
+    <circle cx="14" cy="66" r="6" fill="#0a0a0a"/>
+    <circle cx="106" cy="66" r="6" fill="#0a0a0a"/>
+    <circle cx="60" cy="10" r="5" fill="#0a0a0a"/>
+    <circle cx="60" cy="70" r="5" fill="#0a0a0a"/>
+    <circle cx="50" cy="40" r="8" fill="#f5f0e8"/>
+    <circle cx="75" cy="35" r="7" fill="#c9a84c"/>
+    <circle cx="70" cy="50" r="7" fill="#dc2626"/>
+  </svg>`,
+];
+
+const galleryGrid = document.getElementById('galleryGrid');
+galleryData.forEach((item, i) => {
+  const div = document.createElement('div');
+  div.className = 'gallery-item';
+  div.setAttribute('role', 'img');
+  div.setAttribute('aria-label', item.label);
+  div.style.height = item.h + 'px';
+  const iconIdx = i % galleryIcons.length;
+  div.innerHTML = `
+    <div class="gallery-placeholder" style="background:linear-gradient(135deg,${item.colors[0]},${item.colors[1]});position:relative;flex-direction:column;gap:12px;">
+      ${galleryIcons[iconIdx]}
+      <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(201,168,76,0.6);font-family:'Cinzel',serif;">${item.label}</span>
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.05),transparent);pointer-events:none;"></div>
+    </div>
+    <div class="gallery-overlay">
+      <span class="gallery-overlay-text">${item.label}</span>
+    </div>`;
+  galleryGrid.appendChild(div);
+});
+
+/* ---- Booking Form Validation ---- */
+const bronForm = document.getElementById('bronForm');
+const formSubmit = document.getElementById('formSubmit');
+const formSuccess = document.getElementById('formSuccess');
+
+// Set min date to today
+document.getElementById('sana').min = new Date().toISOString().split('T')[0];
+
+function validateField(group, inputEl) {
+  const val = inputEl.value.trim();
+  let valid = true;
+  if (inputEl.required && !val) valid = false;
+  if (inputEl.type === 'tel' && val && !/^[\+\d\s\-\(\)]{9,15}$/.test(val)) valid = false;
+  group.classList.toggle('invalid', !valid);
+  return valid;
+}
+
+bronForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const groups = bronForm.querySelectorAll('.form-group');
+  let allValid = true;
+  groups.forEach(g => {
+    const inp = g.querySelector('input, select');
+    if (inp && !validateField(g, inp)) allValid = false;
+  });
+  if (!allValid) {
+    const firstInvalid = bronForm.querySelector('.invalid input, .invalid select');
+    if (firstInvalid) firstInvalid.focus();
+    return;
+  }
+  formSubmit.disabled = true;
+  formSubmit.textContent = 'Yuborilmoqda...';
+  await new Promise(r => setTimeout(r, 1600));
+  bronForm.style.display = 'none';
+  formSuccess.classList.add('show');
+});
+
+// Blur-time validation
+bronForm.querySelectorAll('input, select').forEach(inp => {
+  inp.addEventListener('blur', () => {
+    const g = inp.closest('.form-group');
+    if (g) validateField(g, inp);
+  });
+  inp.addEventListener('input', () => {
+    const g = inp.closest('.form-group');
+    if (g && g.classList.contains('invalid')) validateField(g, inp);
+  });
+});
+
+/* ---- Keyboard: scroll indicator ---- */
+document.querySelector('.hero-scroll').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    document.getElementById('haqimda').scrollIntoView({ behavior: 'smooth' });
+  }
+});
+</script>
+</body>
+</html>
