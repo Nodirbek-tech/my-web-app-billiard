@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import Layout from './components/layout/Layout';
 import { Skeleton } from './components/ui/skeleton';
+import { syncServerTime } from '@/lib/utils';
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ProductsPage = lazy(() => import('./pages/ProductsPage'));
@@ -27,6 +28,10 @@ function PageLoader() {
 }
 
 export default function App() {
+  useEffect(() => {
+    syncServerTime('https://billiard-api-2210.onrender.com');
+  }, []);
+
   return (
     <BrowserRouter>
       <Toaster theme="dark" position="top-right" richColors />

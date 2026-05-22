@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Play, Eye, Clock, Sun, Moon } from 'lucide-react';
-import { cn, formatCurrency, calcCostMs, parseTimeHour } from '@/lib/utils';
+import { cn, formatCurrency, calcCostMs, parseTimeHour, now as serverNow } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Table, BusinessSettings } from '@/types';
@@ -17,7 +17,7 @@ function LiveTimer({ startTime }: { startTime: string }) {
 function LiveCost({ startTime, settings }: { startTime: string; settings?: BusinessSettings }) {
   const { elapsed } = useTimer(startTime);
   if (!settings) return null;
-  const now = Date.now();
+  const now = serverNow();
   const start = now - elapsed;
   const cost = calcCostMs(
     start,
@@ -70,8 +70,7 @@ export default function TableCard({ table, settings }: TableCardProps) {
   const session = table.activeSession;
   const currentRound = session?.rounds?.find((r) => !r.endTime);
 
-  const now = new Date();
-  const nowHour = now.getHours();
+  const nowHour = parseInt(new Date(serverNow()).toLocaleString('en-US', { timeZone: 'Asia/Tashkent', hour: 'numeric', hour12: false }), 10);
   const dayStartHour = settings ? parseTimeHour(settings.dayStartTime) : 6;
   const nightStartHour = settings ? parseTimeHour(settings.nightStartTime) : 18;
   const isCurrentlyNight = nowHour >= nightStartHour || nowHour < dayStartHour;

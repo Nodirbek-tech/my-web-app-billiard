@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { formatTimer } from '../lib/utils';
+import { formatTimer, now } from '../lib/utils';
 
 export function useTimer(startTime: string | null | undefined) {
   const [elapsed, setElapsed] = useState(0);
@@ -7,7 +7,7 @@ export function useTimer(startTime: string | null | undefined) {
   useEffect(() => {
     if (!startTime) { setElapsed(0); return; }
     const start = new Date(startTime).getTime();
-    const tick = () => setElapsed(Date.now() - start);
+    const tick = () => setElapsed(now() - start);
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);

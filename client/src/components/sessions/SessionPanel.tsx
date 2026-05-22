@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatCurrency, formatTime, calcCostMs, parseTimeHour } from '@/lib/utils';
+import { formatCurrency, formatTime, calcCostMs, parseTimeHour, now as serverNow } from '@/lib/utils';
 import { useTimer } from '@/hooks/useTimer';
 import { sessionsApi } from '@/api/sessions';
 import { tablesApi } from '@/api/tables';
@@ -28,11 +28,11 @@ interface SessionTimerProps {
 
 function SessionTimer({ startTime, dayRate, nightRate, dayStartHour, nightStartHour }: SessionTimerProps) {
   const { display, elapsed } = useTimer(startTime);
-  const now = Date.now();
+  const now = serverNow();
   const start = now - elapsed;
   const liveCost = calcCostMs(start, now, dayRate, nightRate, dayStartHour, nightStartHour);
 
-  const currentHour = new Date().getHours();
+  const currentHour = parseInt(new Date(serverNow()).toLocaleString('en-US', { timeZone: 'Asia/Tashkent', hour: 'numeric', hour12: false }), 10);
   const isNight = currentHour >= nightStartHour || currentHour < dayStartHour;
   const currentRate = isNight ? nightRate : dayRate;
 
