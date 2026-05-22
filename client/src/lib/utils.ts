@@ -1,6 +1,44 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+// ---------------------------------------------------------------------------
+// Server time sync
+// ---------------------------------------------------------------------------
+// Offset in ms: serverTime - deviceTime. Applied to Date.now() so all clients
+// show the exact same "now" regardless of device clock drift or timezone.
+let _timeOffset = 0;
+
+export function getTimeOffset(): number {
+  return _timeOffset;
+}
+
+/** Returns the current millisecond timestamp corrected to server time. */
+export function now(): number {
+  return Date.now() + _timeOffset;
+}
+
+/**
+ * Fetches /time from the server once on app load, calculates the offset
+ * between server clock and device clock, and stores it for use in `now()`.
+ * Call this once inside your top-level App component (useEffect / onMounted).
+ */
+export async function syncServerTime(baseURL: string): Promise<void> {
+  try {
+    const t0 = Date.now();
+    const res = await fetch(`${baseURL}/time`);
+    const t1 = Date.now();
+    if (!res.ok) return;
+    const { serverTime } = await res.json() as { serverTime: string; tashkentTime: string };
+    const serverMs = new Date(serverTime).getTime();
+    // Use midpoint of the round-trip to approximate the moment the server
+    // captured the timestamp, reducing network-latency error by ~half.
+    const deviceMidpoint = Math.round((t0 + t1) / 2);
+    _timeOffset = serverMs - deviceMidpoint;
+  } catch {
+    // Silently ignore — offset stays 0 and device time is used as fallback.
+  }
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

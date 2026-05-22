@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TimeController } from './time.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -17,6 +18,7 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { PromotionsModule } from './promotions/promotions.module';
 
 @Module({
+  controllers: [TimeController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
