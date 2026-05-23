@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { X, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -19,25 +19,20 @@ const METHOD_LABELS: Record<string, string> = {
 
 function buildLines(r: ReceiptData): string[] {
   const L: string[] = [];
-
   L.push(divider('='));
   L.push(center(BUSINESS.name));
   if (BUSINESS.branch)  L.push(center(BUSINESS.branch));
   if (BUSINESS.address) L.push(center(BUSINESS.address));
   if (BUSINESS.phone)   L.push(center(BUSINESS.phone));
   L.push(divider('='));
-
   L.push(padLine('Chek raqami:', r.receiptNumber));
   L.push(padLine('Sana:', receiptDateTime(r.paidAt)));
   L.push(padLine('Kassir:', r.cashierName || 'Xodim'));
-
   L.push(divider());
   L.push(padLine(`Stol #${r.tableNumber}`, r.tableName));
   L.push(padLine('Boshlanish:', receiptTime(r.startTime)));
   L.push(padLine('Yakunlash:', receiptTime(r.endTime)));
   L.push(padLine('Davomiylik:', durationStr(r.totalMinutes)));
-
-  // Rounds
   L.push(divider());
   L.push("O'YIN VAQTI");
   for (const round of r.rounds) {
@@ -45,26 +40,19 @@ function buildLines(r: ReceiptData): string[] {
     L.push(dotLine(label, formatMoney(round.cost)));
   }
   L.push(padLine("  O'yin jami", formatMoney(r.playCost)));
-
-  // Items
   if (r.orders.length > 0) {
     L.push(divider());
     L.push('MAHSULOTLAR');
     for (const o of r.orders) {
-      const label = `  ${o.name} x${o.quantity}`;
-      L.push(dotLine(label, formatMoney(o.total)));
+      L.push(dotLine(`  ${o.name} x${o.quantity}`, formatMoney(o.total)));
     }
     L.push(padLine('  Mahsulotlar jami', formatMoney(r.orderCost)));
   }
-
-  // Customer info
   if (r.customerName) {
     L.push(divider());
     L.push(padLine('Mijoz:', r.customerName));
     if (r.customerCard) L.push(padLine('Karta:', r.customerCard));
   }
-
-  // Billing breakdown
   L.push(divider());
   L.push(dotLine("O'yin", formatMoney(r.playCost)));
   if (r.orderCost > 0)   L.push(dotLine('Mahsulotlar', formatMoney(r.orderCost)));
@@ -74,8 +62,6 @@ function buildLines(r: ReceiptData): string[] {
   L.push(divider('='));
   L.push(padLine('JAMI', formatMoney(r.totalCost)));
   L.push(divider('='));
-
-  // Payment details
   L.push(padLine("To'lov turi:", METHOD_LABELS[r.method] ?? r.method));
   if ((r.method === 'CASH' || r.method === 'MIXED') && r.cashAmount != null)
     L.push(dotLine('  Naqd qabul qilindi', formatMoney(r.cashAmount)));
@@ -83,89 +69,101 @@ function buildLines(r: ReceiptData): string[] {
     L.push(dotLine('  Karta', formatMoney(r.cardAmount)));
   if (r.change != null && r.change > 0)
     L.push(dotLine('  Qaytim', formatMoney(r.change)));
-
-  // Bonus earned
   if ((r.bonusEarned ?? 0) > 0) {
     L.push(divider());
-    L.push(dotLine('Bonus yig\'ildi', `+${formatMoney(r.bonusEarned!)}`));
+    L.push(dotLine("Bonus yig'ildi", `+${formatMoney(r.bonusEarned!)}`));
     if (r.bonusBalance != null) L.push(dotLine('Bonus balansi', formatMoney(r.bonusBalance)));
   }
-
   if (r.notes) {
     L.push(divider());
     L.push(`Izoh: ${r.notes}`);
   }
-
   L.push(divider());
   for (const line of BUSINESS.footer.split('\n')) L.push(center(line));
   L.push(divider('='));
-
   return L;
 }
 
 export default function ReceiptModal() {
   const { receiptData, setReceiptData } = useUiStore();
-
   const lines = useMemo(() => (receiptData ? buildLines(receiptData) : []), [receiptData]);
   const receiptText = lines.join('\n');
 
-  useEffect(() => {
-    if (receiptData) {
-      const t = setTimeout(() => window.print(), 400);
-      return () => clearTimeout(t);
-    }
-  }, [receiptData]);
-
   const handleClose = () => setReceiptData(null);
 
+  const handlePrint = () => {
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:80mm;height:auto;border:none;';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) { document.body.removeChild(iframe); return; }
+    doc.open();
+    doc.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #000;
+    background: #fff;
+    padding: 2mm;
+    width: 80mm;
+  }
+  pre {
+    white-space: pre;
+    font-family: inherit;
+    font-size: inherit;
+  }
+  @media print {
+    body { width: 80mm; }
+  }
+</style>
+</head>
+<body>
+<pre>${receiptText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+</body>
+</html>`);
+    doc.close();
+    setTimeout(() => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } finally {
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      }
+    }, 500);
+  };
+
   return (
-    <>
-      <Dialog open={!!receiptData} onOpenChange={(v) => { if (!v) handleClose(); }}>
-        <DialogContent className="max-w-sm p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
-          <DialogHeader className="p-4 pb-3 border-b border-border flex-shrink-0">
-            <DialogTitle className="text-base">Chek {receiptData?.receiptNumber}</DialogTitle>
-            <DialogDescription className="sr-only">To'lov cheki tafsilotlari</DialogDescription>
-          </DialogHeader>
-
-          <ScrollArea className="flex-1">
-            <div className="p-4">
-              <pre className="font-mono text-[11px] leading-[1.45] rounded-lg p-3 whitespace-pre overflow-x-auto" style={{ background: '#ffffff', color: '#000000', border: '1px solid #d1d5db' }}>
-                {receiptText}
-              </pre>
-            </div>
-          </ScrollArea>
-
-          <div className="p-4 pt-3 border-t border-border flex gap-2 flex-shrink-0 bg-card">
-            <Button variant="outline" className="flex-none" onClick={handleClose}>
-              <X className="w-4 h-4 mr-2" /> Yopish
-            </Button>
-            <Button className="flex-1" onClick={() => window.print()}>
-              <Printer className="w-4 h-4 mr-2" /> Chop etish
-            </Button>
+    <Dialog open={!!receiptData} onOpenChange={(v) => { if (!v) handleClose(); }}>
+      <DialogContent className="max-w-sm p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
+        <DialogHeader className="p-4 pb-3 border-b border-border flex-shrink-0">
+          <DialogTitle className="text-base">Chek {receiptData?.receiptNumber}</DialogTitle>
+          <DialogDescription className="sr-only">To'lov cheki tafsilotlari</DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="flex-1">
+          <div className="p-4">
+            <pre
+              className="font-mono text-[11px] leading-[1.45] rounded-lg p-3 whitespace-pre overflow-x-auto"
+              style={{ background: '#ffffff', color: '#000000', border: '1px solid #d1d5db' }}
+            >
+              {receiptText}
+            </pre>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {receiptData && (
-        <div
-          id="receipt-print-area"
-          style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '80mm' }}
-          aria-hidden="true"
-        >
-          <pre style={{
-            fontFamily: "'Courier New', Courier, monospace",
-            fontSize: '11px',
-            lineHeight: '1.4',
-            color: '#000',
-            background: '#fff',
-            margin: 0,
-            padding: '2mm',
-            whiteSpace: 'pre',
-          }}>
-            {receiptText}
-          </pre>
+        </ScrollArea>
+        <div className="p-4 pt-3 border-t border-border flex gap-2 flex-shrink-0 bg-card">
+          <Button variant="outline" className="flex-none" onClick={handleClose}>
+            <X className="w-4 h-4 mr-2" /> Yopish
+          </Button>
+          <Button className="flex-1" onClick={handlePrint}>
+            <Printer className="w-4 h-4 mr-2" /> Chop etish
+          </Button>
         </div>
-      )}
-    </>
+      </DialogContent>
+    </Dialog>
   );
 }
