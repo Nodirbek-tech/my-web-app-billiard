@@ -93,7 +93,7 @@ export default function ReceiptModal() {
 
   const handlePrint = () => {
     const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:80mm;height:auto;border:none;';
+    iframe.style.cssText = 'display:none;';
     document.body.appendChild(iframe);
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!doc) { document.body.removeChild(iframe); return; }
@@ -101,40 +101,52 @@ export default function ReceiptModal() {
     doc.write(`<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8"/>
+<meta charset="utf-8">
+<title>Chek</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 11px;
-    line-height: 1.4;
-    color: #000;
-    background: #fff;
-    padding: 2mm;
+  html, body {
     width: 80mm;
+    height: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  body {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.5;
+    color: black;
   }
   pre {
-    white-space: pre;
-    font-family: inherit;
-    font-size: inherit;
+    margin: 0 !important;
+    padding: 2mm !important;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  @page {
+    size: 80mm auto;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   @media print {
-    body { width: 80mm; }
+    html, body { margin: 0; padding: 0; }
   }
 </style>
 </head>
 <body>
-<pre>${receiptText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+<pre>${receiptText}</pre>
 </body>
 </html>`);
     doc.close();
     setTimeout(() => {
-      try {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-      } finally {
-        setTimeout(() => document.body.removeChild(iframe), 1000);
-      }
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => document.body.removeChild(iframe), 1000);
     }, 500);
   };
 
